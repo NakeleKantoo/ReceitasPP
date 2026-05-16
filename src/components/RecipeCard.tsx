@@ -8,7 +8,7 @@ import type { Recipe } from '@/types/recipe';
 
 interface RecipeCardProps {
   recipe: Recipe;
-  onPress: () => void;
+  onPress?: () => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   statusLabel?: boolean;
@@ -25,13 +25,14 @@ export function RecipeCard({
 
   return (
     <Pressable
+      disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
         {
           backgroundColor: colors.surface,
           borderColor: colors.border,
-          opacity: pressed ? 0.85 : 1,
+          opacity: pressed && onPress ? 0.85 : 1,
         },
       ]}>
       <View style={styles.header}>

@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
 
 import { RecipeCard } from '@/components/RecipeCard';
 import { Screen } from '@/components/Screen';
@@ -7,7 +6,6 @@ import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
 
 export default function ReceitasAdminScreen() {
-  const router = useRouter();
   const { allRecipes } = useRecipes();
 
   return (
@@ -20,12 +18,6 @@ export default function ReceitasAdminScreen() {
             key={recipe.id}
             recipe={recipe}
             statusLabel
-            onPress={() =>
-              router.push({
-                pathname: '/(user)/receita/[id]',
-                params: { id: recipe.id },
-              })
-            }
           />
         ))}
       </View>

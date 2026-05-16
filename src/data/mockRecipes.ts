@@ -16,7 +16,7 @@ export const mockRecipes: Recipe[] = [
     ],
     preparationMode: [
       'Bata os ovos com o sal.',
-      'Aqueça o oleo em uma frigideira.',
+      'Aqueca o oleo em uma frigideira.',
       'Despeje os ovos e adicione o queijo por cima.',
       'Cozinhe ate firmar e dobre ao meio.',
     ],
@@ -38,7 +38,7 @@ export const mockRecipes: Recipe[] = [
       { ingredientId: 'sal', quantity: 3, unit: 'g' },
     ],
     preparationMode: [
-      'Aqueça o oleo e refogue rapidamente o arroz.',
+      'Aqueca o oleo e refogue rapidamente o arroz.',
       'Tempere com sal.',
       'Cozinhe com agua ate o arroz ficar macio e soltinho.',
     ],
@@ -110,7 +110,7 @@ export const mockRecipes: Recipe[] = [
     ],
     preparationMode: [
       'Misture farinha, leite, ovos e sal ate formar uma massa lisa.',
-      'Aqueça uma frigideira untada com oleo.',
+      'Aqueca uma frigideira untada com oleo.',
       'Despeje pequenas porcoes e doure dos dois lados.',
     ],
     createdBy: 'admin-root',

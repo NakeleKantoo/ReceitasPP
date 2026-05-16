@@ -177,6 +177,59 @@ npx tsc --noEmit
 
 O projeto ja deixou de ser um template Expo e passou a ter fluxo funcional minimo para demonstracao academica. Ainda faltam fases futuras, como cadastro completo de receitas pelo usuario, aprovacao com acoes administrativas completas e maior profundidade em relatorios.
 
+## Relatorio do que foi implementado ate agora
+
+Nesta etapa, o projeto Receitas++ saiu de uma base generica do Expo Router e passou a ter um fluxo funcional minimo alinhado ao objetivo do trabalho. A arquitetura foi reorganizada em `app/` e `src/`, com separacao entre componentes, hooks, services, tipos, mocks, tema e utilitarios.
+
+No fluxo publico e autenticado, foram implementadas:
+
+- tela inicial real do app
+- tela de login funcional
+- tela de cadastro funcional para usuario comum
+- persistencia local de sessao com AsyncStorage
+- redirecionamento por perfil entre usuario comum e superadmin
+- protecao basica de rotas por layout
+
+No fluxo do usuario comum, foram implementadas:
+
+- home com atalhos rapidos
+- busca de receitas por nome
+- filtro por categoria
+- listagem apenas de receitas aprovadas
+- tela de detalhe da receita
+- favoritos por usuario
+- perfil com logout
+- tela de ingredientes com informacao de quantidades
+- tela de resultados baseada no filtro inteligente
+
+Na regra central do projeto, foram implementadas:
+
+- comparacao entre ingredientes exigidos e ingredientes disponiveis
+- comparacao entre quantidade exigida e quantidade disponivel
+- retorno apenas de receitas totalmente compativeis
+- mensagens vazias quando nao ha busca ou nao ha receitas possiveis
+- centralizacao da logica principal em `src/utils/recipeCompatibility.ts`
+
+No fluxo administrativo inicial, foram implementadas:
+
+- login com conta superadmin mockada
+- redirecionamento para area administrativa
+- dashboard inicial com indicadores
+- listagem de usuarios cadastrados
+- listagem geral de receitas
+- fila de receitas pendentes
+- relatorios iniciais com categorias e ingredientes
+
+## Pontos de atencao no projeto atual
+
+- A autenticacao ainda e simulada e local. Ela atende bem ao objetivo academico atual, mas nao substitui backend real, hash de senha, token ou controle de sessao de producao.
+- As receitas ainda sao baseadas em mocks estaticos. O cadastro completo de novas receitas pelo usuario e a moderacao admin com edicao, aprovacao e remocao ainda precisam ser aprofundados nas proximas fases.
+- O painel do superadmin ja existe, mas ainda esta em nivel inicial. Ele mostra dados e listas, porem ainda nao executa todas as acoes administrativas previstas no escopo final.
+- A tela `nova-receita` continua como placeholder arquitetural e ainda nao representa o fluxo final de submissao.
+- O projeto ainda nao passou por validacao completa em emulador/dispositivo para UX fina, apenas por revisao estrutural e checagem de TypeScript.
+- Existe um diretorio antigo de teste em `components/__tests__`, mas o projeto ainda nao possui uma suite de testes configurada de fato. Isso merece alinhamento futuro para evitar falsa impressao de cobertura.
+- O historico de buscas e a persistencia local ja foram preparados, mas o uso analitico desses dados ainda e simples nesta etapa.
+
 ## Observacoes
 
 - A autenticacao desta etapa e local e simulada, adequada para demonstracao e testes academicos.

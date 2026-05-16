@@ -1,13 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { mockIngredients } from '@/data/mockIngredients';
-import {
-  getAllRecipes,
-  getApprovedRecipes,
-  getCategories,
-  getRecipeById as findRecipeById,
-  getUserRecipes as listUserRecipes,
-} from '@/services/recipeService';
+import { getAllRecipes } from '@/services/recipeService';
 import { getCompatibleRecipes, getRecipeMissingRequirements } from '@/utils/recipeCompatibility';
 import type { AvailableIngredient, Ingredient } from '@/types/ingredient';
 import type { Recipe } from '@/types/recipe';
@@ -41,12 +35,18 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const approvedRecipes = useMemo(() => getApprovedRecipes(), [allRecipes]);
+  const approvedRecipes = useMemo(
+    () => allRecipes.filter((recipe) => recipe.status === 'approved'),
+    [allRecipes]
+  );
   const pendingRecipes = useMemo(
     () => allRecipes.filter((recipe) => recipe.status === 'pending'),
     [allRecipes]
   );
-  const categories = useMemo(() => ['Todas', ...getCategories()], [allRecipes]);
+  const categories = useMemo(
+    () => ['Todas', ...new Set(approvedRecipes.map((recipe) => recipe.category))],
+    [approvedRecipes]
+  );
 
   const value = useMemo<RecipesContextValue>(
     () => ({
@@ -58,8 +58,8 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
       latestAvailableIngredients,
       compatibleRecipes,
       isLoading,
-      getRecipeById: findRecipeById,
-      getUserRecipes: listUserRecipes,
+      getRecipeById: (recipeId) => allRecipes.find((recipe) => recipe.id === recipeId),
+      getUserRecipes: (userId) => allRecipes.filter((recipe) => recipe.createdBy === userId),
       runCompatibilityCheck: (ingredients) => {
         const results = getCompatibleRecipes(approvedRecipes, ingredients, mockIngredients);
         setLatestAvailableIngredients(ingredients);
@@ -71,7 +71,7 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
         setCompatibleRecipes([]);
       },
       getMissingRequirements: (recipeId) => {
-        const recipe = findRecipeById(recipeId);
+        const recipe = allRecipes.find((item) => item.id === recipeId);
         if (!recipe) {
           return [];
         }
