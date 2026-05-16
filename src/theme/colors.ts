@@ -1,0 +1,51 @@
+export const palette = {
+  tomato: '#d94f30',
+  tomatoDark: '#ff8a65',
+  basil: '#48724b',
+  basilDark: '#9bcf90',
+  cream: '#fff8ef',
+  charcoal: '#1f1b18',
+  amber: '#f0b35a',
+  borderLight: '#eaded0',
+  borderDark: '#40362f',
+  mutedLight: '#786a5f',
+  mutedDark: '#c7b8ab',
+  surfaceLight: '#ffffff',
+  surfaceDark: '#2d2621',
+  backgroundDark: '#181411',
+  danger: '#c24633',
+  success: '#2f7d4b',
+} as const;
+
+export const appColors = {
+  light: {
+    background: palette.cream,
+    surface: palette.surfaceLight,
+    text: palette.charcoal,
+    mutedText: palette.mutedLight,
+    primary: palette.tomato,
+    secondary: palette.basil,
+    accent: palette.amber,
+    border: palette.borderLight,
+    card: '#fffdf9',
+    danger: palette.danger,
+    success: palette.success,
+    tabInactive: '#a38f80',
+  },
+  dark: {
+    background: palette.backgroundDark,
+    surface: palette.surfaceDark,
+    text: '#fff9f2',
+    mutedText: palette.mutedDark,
+    primary: palette.tomatoDark,
+    secondary: palette.basilDark,
+    accent: palette.amber,
+    border: palette.borderDark,
+    card: '#241e1a',
+    danger: '#ff8c73',
+    success: '#6fc08a',
+    tabInactive: '#9f8b7e',
+  },
+} as const;
+
+export type AppThemeMode = keyof typeof appColors;
