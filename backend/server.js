@@ -1,0 +1,215 @@
+import express from "express";
+
+import bodyParser from "body-parser";
+import cors from "cors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+
+import { AppDataSource } from "./data-source.js";
+
+import { Ingrediente } from "./entity/Ingrediente.js";
+import { Receita } from "./entity/Receita.js";
+import { Usuario } from "./entity/Usuario.js";
+import { resumeToPipeableStream } from "react-dom/server";
+
+AppDataSource.initialize().then(
+    () => console.log("Banco de dados inicializado com sucesso!")
+);
+
+const usuarioRepo = AppDataSource.getRepository(Usuario);
+const receitaRepo = AppDataSource.getRepository(Receita);
+const ingredienteRepo = AppDataSource.getRepository(Ingrediente);
+
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.json({ limit: '20mb' }));
+
+dotenv.config({ quiet: false, debug: true });
+
+const checkAuth = (req, res, next) => {
+    try {
+        const bearertoken = req.headers['authorization'];
+        if (!bearertoken && !bearertoken.startsWith('Bearer ')) {
+            res.status(401).json({ message: 'Token mal-formado' });
+        }
+        const token = bearertoken.split(' ')[1];
+
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        if (user) {
+            req.user = user
+            next();
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(401).json({ message: 'Sem autorização' })
+    }
+}
+
+const checkAdmin = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const realUser = await usuarioRepo.findOneBy({ id: user.id, email: user.email });
+        if (realUser.account_type && (realUser.account_type !== 'normal' && realUser.account_type === 'superadmin')) {
+            next();
+        } else { throw 'Not admin trying to connect to admin endpoint' }
+    } catch (err) {
+        console.log(err);
+        res.status(401).json({ message: 'Sem autorização' })
+    }
+}
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await usuarioRepo.findOneBy({ email });
+        const isUser = await bcrypt.compare(password, user.password);
+        if (isUser) {
+            const token = jwt.sign({ id: user.id, email: user.email, username: user.username },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: '7d'
+                }
+            );
+
+            res.status(202).json({ message: 'Login bem sucedido', token });
+        } else { throw 'fuck'; }
+
+    } catch (err) {
+        res.status(401).json({ message: 'E-mail ou senha incorretos.' });
+    }
+});
+
+app.post('/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        const pass = await bcrypt.hash(password, 10);
+
+        await usuarioRepo.insert({
+            username, email, password: pass, account_type: 'normal', created_at: new Date()
+        });
+
+        const user = await usuarioRepo.findOneBy({
+            username, email
+        });
+
+        const usuario = { password: null, ...user };
+
+        const token = jwt.sign({ id: user.id, email: user.email, username: user.username },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '7d'
+            }
+        );
+
+        res.status(202).json({ message: 'Usuario registrado', token, usuario });
+    } catch (err) {
+        console.log(err);
+        res.status(401).json({ message: 'Algo deu errado. (E-mail já cadastrado?)' });
+
+    }
+});
+
+
+app.get('/receitas', checkAuth, async (req, res) => {
+    const result = await receitaRepo.find({ 'relations': { 'ingredientes': true } });
+    res.status(200).json(result);
+});
+
+app.post('/receitas', checkAuth, async (req, res) => {
+    try {
+        const { nome, passos, refeicao, tempoPreparo, porcoes } = req.body;
+
+        const result = await receitaRepo.insert({
+            nome, passos, refeicao, tempoPreparo, porcoes
+        });
+
+        res.status(201).json({ message: 'Receita criada com sucesso', id: result.raw['id'] });
+    } catch (err) {
+        res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.put('/receitas/ingrediente', checkAuth, async (req, res) => {
+    try {
+        const { id, ingredientes } = req.body;
+
+        const receita = await receitaRepo.findOne({'relations': {'ingredientes':true}, 'where': {'id': id}});
+
+        ingredientes.forEach(async i => {
+            const ingrediente = await ingredienteRepo.findOneBy({id:i});
+            receita['ingredientes'].push(ingrediente);
+        });
+
+        await receitaRepo.save(receita);
+
+        res.status(201).json({ message: 'Receita atualizada com sucesso', receita });
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.put('/receitas', checkAuth, async (req, res) => {
+    try {
+        const { id, nome, passos, refeicao, tempoPreparo, porcoes } = req.body;
+
+        const result = await receitaRepo.update({
+            id
+        }, { nome, passos, refeicao, tempoPreparo, porcoes });
+
+        res.status(201).json({ message: 'Receita atualizada com sucesso', id: result.raw['id'] });
+    } catch (err) {
+        res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.delete('/receitas/:id', checkAuth, async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const result = await receitaRepo.delete({
+            id
+        });
+
+        res.status(201).json({ message: 'Receita deletada com sucesso', id: result.raw['id'] });
+    } catch (err) {
+        res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.get('/ingredientes', checkAuth, async (req, res) => {
+    try {
+        const result = await ingredienteRepo.find();
+
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.post('/ingredientes', checkAuth, checkAdmin, async (req, res) => {
+    try {
+        const { nome, unidade } = req.body;
+        await ingredienteRepo.insert({ nome, unidade });
+
+        res.status(201).json({message: 'Ingrediente inserido com sucesso'});
+    } catch (err) {
+        res.status(500).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+
+
+app.listen(3069, () => console.log('Receitas++ sendo executado na porta 3069, acesse via http://localhost:3069/'))
+
+
