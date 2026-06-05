@@ -19,7 +19,7 @@ export default function AdminLayout() {
     return <Redirect href="/login" />;
   }
 
-  if (user.role !== 'superadmin') {
+  if (user.account_type !== 'superadmin') {
     return <Redirect href="/(user)/home" />;
   }
 

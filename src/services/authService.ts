@@ -9,6 +9,7 @@ import {
   saveStoredUsers,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
+import { registerOnline } from '@/utils/endpoints';
 
 export async function getUserById(userId: string) {
   await initializeStorage();
@@ -45,8 +46,6 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(name: string, email: string, password: string) {
-  await initializeStorage();
-
   if (!name.trim()) {
     throw new Error('Informe seu nome.');
   }
@@ -59,26 +58,14 @@ export async function register(name: string, email: string, password: string) {
     throw new Error('Informe uma senha.');
   }
 
-  const users = await getStoredUsers();
-  const normalizedEmail = email.trim().toLowerCase();
 
-  if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
-    throw new Error('Ja existe uma conta com este e-mail.');
+  const res = await registerOnline(name, email, password);
+
+  if (!res) {
+    throw new Error('Erro.')
   }
 
-  const newUser: User = {
-    id: generateId('user'),
-    name: name.trim(),
-    email: normalizedEmail,
-    password,
-    role: 'user',
-    createdAt: new Date().toISOString(),
-  };
-
-  await saveStoredUsers([...users, newUser]);
-  await saveStoredSession({ userId: newUser.id });
-
-  return newUser;
+  return res;
 }
 
 export async function logout() {

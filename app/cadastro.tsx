@@ -22,7 +22,7 @@ export default function CadastroScreen() {
 
   useEffect(() => {
     if (user) {
-      router.replace(user.role === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
+      router.replace(user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
     }
   }, [router, user]);
 

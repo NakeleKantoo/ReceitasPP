@@ -17,12 +17,12 @@ export default function HomeScreen() {
   const { approvedRecipes, getUserRecipes } = useRecipes();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const featuredRecipes = approvedRecipes.slice(0, 3);
+  const featuredRecipes = approvedRecipes?.slice(0, 3);
   const myRecipesCount = user ? getUserRecipes(user.id).length : 0;
 
   return (
     <Screen
-      title={`Ola, ${user?.name.split(' ')[0] ?? 'chef'}!`}
+      title={`Ola, ${user?.username.split(' ')[0] ?? 'chef'}!`}
       subtitle="Escolha uma forma rapida de encontrar receitas que funcionem com a sua despensa.">
       <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.bannerTitle, { color: colors.text }]}>Seu atalho na cozinha</Text>

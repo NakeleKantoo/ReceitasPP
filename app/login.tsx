@@ -26,7 +26,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (user) {
-      router.replace(user.role === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
+      router.replace(user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
     }
   }, [router, user]);
 
@@ -35,7 +35,7 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       setError('');
       const loggedUser = await login(email, password);
-      router.replace(loggedUser.role === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
+      router.replace(loggedUser.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : 'Nao foi possivel entrar.');
     } finally {

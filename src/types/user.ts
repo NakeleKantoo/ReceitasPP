@@ -1,11 +1,11 @@
-export type UserRole = 'user' | 'superadmin';
+export type UserRole = 'normal' | 'superadmin';
 
 export interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
   password: string;
-  role: UserRole;
+  account_type: UserRole;
   createdAt: string;
 }
 

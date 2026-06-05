@@ -38,9 +38,9 @@ export default function UsuariosScreen() {
             <View
               key={user.id}
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
+              <Text style={[styles.name, { color: colors.text }]}>{user.username}</Text>
               <Text style={[styles.info, { color: colors.mutedText }]}>{user.email}</Text>
-              <Text style={[styles.info, { color: colors.mutedText }]}>Perfil: {user.role}</Text>
+              <Text style={[styles.info, { color: colors.mutedText }]}>Perfil: {user.account_type}</Text>
               <Text style={[styles.info, { color: colors.mutedText }]}>
                 Criado em {formatDate(user.createdAt)}
               </Text>

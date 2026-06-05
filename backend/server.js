@@ -69,7 +69,7 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await usuarioRepo.findOneBy({ email });
+        const user = await usuarioRepo.findOne({where: {email}, select: {id: true, username: true, password: true, email: true}});
         const isUser = await bcrypt.compare(password, user.password);
         if (isUser) {
             const token = jwt.sign({ id: user.id, email: user.email, username: user.username },
@@ -83,6 +83,7 @@ app.post('/login', async (req, res) => {
         } else { throw 'fuck'; }
 
     } catch (err) {
+        console.log(err);
         res.status(401).json({ message: 'E-mail ou senha incorretos.' });
     }
 });
@@ -120,34 +121,49 @@ app.post('/register', async (req, res) => {
 
 
 app.get('/receitas', checkAuth, async (req, res) => {
-    const result = await receitaRepo.find({ 'relations': { 'ingredientes': true } });
+    const result = await receitaRepo.find({ 'relations': { 'ingredientes': true, 'autor': true } });
     res.status(200).json(result);
 });
 
 app.post('/receitas', checkAuth, async (req, res) => {
     try {
         const { nome, passos, refeicao, tempoPreparo, porcoes } = req.body;
-
+        
         const result = await receitaRepo.insert({
             nome, passos, refeicao, tempoPreparo, porcoes
         });
+        
+        const receita = await receitaRepo.findOne({
+            where: {
+                id: result.raw,
+            }
+        });
 
-        res.status(201).json({ message: 'Receita criada com sucesso', id: result.raw['id'] });
+        receita.autor = req.user.id;
+        console.log(req.user, req.user.id);
+
+        await receitaRepo.save(receita);
+
+        res.status(201).json({ message: 'Receita criada com sucesso', id: result.raw });
     } catch (err) {
         res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
     }
 });
 
-app.put('/receitas/ingrediente', checkAuth, async (req, res) => {
+app.put('/receitas/ingredientes', checkAuth, async (req, res) => {
     try {
         const { id, ingredientes } = req.body;
 
         const receita = await receitaRepo.findOne({'relations': {'ingredientes':true}, 'where': {'id': id}});
 
+        const newIngredientes = []
+
         ingredientes.forEach(async i => {
             const ingrediente = await ingredienteRepo.findOneBy({id:i});
-            receita['ingredientes'].push(ingrediente);
+            newIngredientes.push(ingrediente);
         });
+
+        receita['ingredientes'] = newIngredientes;
 
         await receitaRepo.save(receita);
 
@@ -204,7 +220,29 @@ app.post('/ingredientes', checkAuth, checkAdmin, async (req, res) => {
 
         res.status(201).json({message: 'Ingrediente inserido com sucesso'});
     } catch (err) {
-        res.status(500).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+        res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
+    }
+});
+
+app.put('/ingredientes', checkAuth, checkAdmin, async (req, res) => {
+    try {
+        const { id, nome, unidade } = req.body;
+        await ingredienteRepo.update({id}, {nome, unidade});
+
+        res.status(202).json({message: 'Ingrediente atualizado com sucesso'});
+    } catch (err) {
+        res.status(400).json({message: 'Requisição mal-formada'})
+    }
+});
+
+app.delete('/ingredientes/:id', checkAuth, checkAdmin, async (req, res) => {
+    try {
+        const id = req.params.id
+        await ingredienteRepo.delete({id});
+
+        res.status(202).json({message: 'Ingrediente removido com sucesso'});
+    } catch (err) {
+        res.status(400).json({message: 'Requisição mal-formada'})
     }
 });
 

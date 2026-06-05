@@ -15,10 +15,11 @@ export const Usuario = new EntitySchema({
     },
     username: {
       type: "text",
-      unique: false
+      unique: false,
     },
     password: {
       type: "text",
+      select: false
     },
     account_type: {
       type: 'text'

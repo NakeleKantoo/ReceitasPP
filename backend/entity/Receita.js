@@ -35,6 +35,12 @@ export const Receita = new EntitySchema({
       type: 'many-to-many',
       target: 'Usuario',
       inverseSide: 'favoritos'
+    },
+    autor: {
+      type: 'many-to-one',
+      target: 'Usuario',
+      joinColum: { name: 'autor_id'},
+      onDelete: "CASCADE"
     }
   }
 });
