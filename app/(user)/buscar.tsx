@@ -25,11 +25,11 @@ export default function BuscarScreen() {
     return approvedRecipes.filter((recipe) => {
       const matchesQuery =
         !normalizedQuery ||
-        recipe.title.toLowerCase().includes(normalizedQuery) ||
+        recipe.nome.toLowerCase().includes(normalizedQuery) ||
         recipe.description.toLowerCase().includes(normalizedQuery);
 
       const matchesCategory =
-        selectedCategory === 'Todas' || recipe.category === selectedCategory;
+        selectedCategory === 'Todas' || recipe.refeicao === selectedCategory;
 
       return matchesQuery && matchesCategory;
     });

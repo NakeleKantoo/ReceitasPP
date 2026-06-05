@@ -1,39 +1,30 @@
-import type { IngredientUnit } from '@/types/ingredient';
-
-export type RecipeStatus = 'pending' | 'approved' | 'rejected';
-export type RecipeSource = 'seed' | 'user';
+import type { Ingredient, IngredientUnit } from '@/types/ingredient';
 
 export interface RecipeIngredient {
-  ingredientId: string;
-  quantity: number;
-  unit: IngredientUnit;
+  id: number;
+  ingrediente: Ingredient;
+  quantidade: number;
 }
 
 export interface Recipe {
   id: string;
-  title: string;
-  description: string;
-  category: string;
-  preparationTime: number;
-  servings: number;
-  ingredients: RecipeIngredient[];
-  preparationMode: string[];
-  createdBy: string;
-  status: RecipeStatus;
-  source: RecipeSource;
+  nome: string;
+  refeicao: string;
+  tempoPreparo: number;
+  porcoes: number;
+  ingredientes: RecipeIngredient[];
+  passos: string;
+  autor: string;
   createdAt: string;
 }
 
 export interface NewRecipeInput {
-  title: string;
-  description: string;
-  category: string;
-  preparationTime: number;
-  servings: number;
-  ingredients: RecipeIngredient[];
-  preparationMode: string[];
-}
-
-export interface UpdateRecipeInput extends Partial<NewRecipeInput> {
-  status?: RecipeStatus;
+  nome: string;
+  refeicao: string;
+  tempoPreparo: number;
+  porcoes: number;
+  ingredientes: RecipeIngredient[];
+  passos: string;
+  autor: string;
+  createdAt: string;
 }

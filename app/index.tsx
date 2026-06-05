@@ -8,6 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { spacing } from '@/theme/spacing';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 export default function EntryScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
@@ -24,21 +26,24 @@ export default function EntryScreen() {
   }
 
   return (
-    <Screen scroll={false}>
-      <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.kicker, { color: colors.primary }]}>Receitas++</Text>
-        <Text style={[styles.title, { color: colors.text }]}>Receitas inteligentes com o que voce ja tem em casa</Text>
-        <Text style={[styles.description, { color: colors.mutedText }]}>
-          Entre com uma conta de teste ou crie um usuario comum para buscar receitas, ver detalhes e
-          descobrir quais pratos sao realmente possiveis com a sua despensa.
-        </Text>
-      </View>
 
-      <View style={styles.actions}>
-        <Button title="Entrar" onPress={() => router.push('/login')} />
-        <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
-      </View>
-    </Screen>
+    <SafeAreaView>
+      <Screen scroll={false}>
+        <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.kicker, { color: colors.primary }]}>Receitas++</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Receitas inteligentes com o que voce ja tem em casa</Text>
+          <Text style={[styles.description, { color: colors.mutedText }]}>
+            Entre com uma conta de teste ou crie um usuario comum para buscar receitas, ver detalhes e
+            descobrir quais pratos sao realmente possiveis com a sua despensa.
+          </Text>
+        </View>
+
+        <View style={styles.actions}>
+          <Button title="Entrar" onPress={() => router.push('/login')} />
+          <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
+        </View>
+      </Screen>
+    </SafeAreaView>
   );
 }
 

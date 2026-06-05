@@ -3,45 +3,34 @@ import { validateEmail } from '@/utils/validators';
 import {
   clearStoredSession,
   getStoredSession,
-  getStoredUsers,
+  getStoredUser,
   initializeStorage,
   saveStoredSession,
-  saveStoredUsers,
+  saveStoredUser,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
-import { registerOnline } from '@/utils/endpoints';
+import { loginOnline, registerOnline } from '@/utils/endpoints';
 
-export async function getUserById(userId: string) {
+export async function getUser() {
   await initializeStorage();
-  const users = await getStoredUsers();
-  return users.find((user) => user.id === userId) ?? null;
+  const user = await getStoredUser();
+  return user;
 }
 
 export async function restoreSessionUser() {
-  await initializeStorage();
-  const session = await getStoredSession();
-
-  if (!session) {
-    return null;
-  }
-
-  return getUserById(session.userId);
+  return await getUser();
 }
 
 export async function login(email: string, password: string) {
-  await initializeStorage();
-  const normalizedEmail = email.trim().toLowerCase();
-  const users = await getStoredUsers();
-
-  const matchedUser = users.find(
-    (user) => user.email.toLowerCase() === normalizedEmail && user.password === password
-  );
+  
+  const normalizedEmail = email.trim();
+  
+  const matchedUser = await loginOnline(normalizedEmail, password);
 
   if (!matchedUser) {
     throw new Error('E-mail ou senha invalidos.');
   }
 
-  await saveStoredSession({ userId: matchedUser.id });
   return matchedUser;
 }
 

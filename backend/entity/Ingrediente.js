@@ -16,12 +16,4 @@ export const Ingrediente = new EntitySchema({
         type: 'text',
     }
   },
-  relations: {
-    receitas: {
-        type: 'many-to-many',
-        target: 'Receita',
-        inverseSide: 'ingredientes',
-        joinTable: true
-    },
-  }
 });

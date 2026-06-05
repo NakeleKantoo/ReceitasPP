@@ -32,11 +32,11 @@ export async function getDashboardStats() {
   const searchedIngredients: Record<string, number> = {};
 
   for (const recipe of recipes) {
-    categoryUsage[recipe.category] = (categoryUsage[recipe.category] ?? 0) + 1;
+    categoryUsage[recipe.refeicao] = (categoryUsage[recipe.refeicao] ?? 0) + 1;
 
-    for (const ingredient of recipe.ingredients) {
+    for (const ingredient of recipe.ingredientes) {
       const ingredientName =
-        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.name ??
+        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.nome ??
         ingredient.ingredientId;
       usedIngredients[ingredientName] = (usedIngredients[ingredientName] ?? 0) + 1;
     }
@@ -45,7 +45,7 @@ export async function getDashboardStats() {
   for (const log of searchLogs) {
     for (const ingredient of log.ingredients) {
       const ingredientName =
-        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.name ??
+        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.nome ??
         ingredient.ingredientId;
       searchedIngredients[ingredientName] = (searchedIngredients[ingredientName] ?? 0) + 1;
     }

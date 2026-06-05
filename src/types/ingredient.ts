@@ -1,9 +1,9 @@
-export type IngredientUnit = 'g' | 'ml' | 'un';
+export type IngredientUnit = 'g' | 'ml' | 'un' | 'kg' | 'l';
 
 export interface Ingredient {
   id: string;
-  name: string;
-  unit: IngredientUnit;
+  nome: string;
+  unidade: IngredientUnit;
 }
 
 export interface AvailableIngredient {

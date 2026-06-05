@@ -9,7 +9,7 @@ export function validatePositiveNumber(value: number) {
 }
 
 export function hasDuplicateIngredientIds(ingredients: RecipeIngredient[]) {
-  const ids = ingredients.map((ingredient) => ingredient.ingredientId);
+  const ids = ingredients.map((ingredient) => ingredient.id);
   return new Set(ids).size !== ids.length;
 }
 

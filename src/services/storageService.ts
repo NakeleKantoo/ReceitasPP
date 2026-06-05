@@ -2,12 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { mockFavorites } from '@/data/mockFavorites';
 import { mockSearchLogs } from '@/data/mockSearchLogs';
-import { mockUsers } from '@/data/mockUsers';
 import type { Favorite, SearchLog } from '@/types/favorite';
 import type { Session, User } from '@/types/user';
 
 const storageKeys = {
-  users: '@receitaspp/users',
+  user: '@receitaspp/users',
   favorites: '@receitaspp/favorites',
   session: '@receitaspp/session',
   searchLogs: '@receitaspp/search-logs',
@@ -34,17 +33,16 @@ async function seedCollection<T>(key: string, initialValue: T) {
 }
 
 export async function initializeStorage() {
-  await seedCollection(storageKeys.users, mockUsers);
   await seedCollection(storageKeys.favorites, mockFavorites);
   await seedCollection(storageKeys.searchLogs, mockSearchLogs);
 }
 
-export function getStoredUsers() {
-  return readJson<User[]>(storageKeys.users, []);
+export function getStoredUser() {
+  return readJson<User | null>(storageKeys.user, null);
 }
 
-export function saveStoredUsers(users: User[]) {
-  return writeJson(storageKeys.users, users);
+export function saveStoredUser(user: User) {
+  return writeJson(storageKeys.user, user);
 }
 
 export function getStoredFavorites() {

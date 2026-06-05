@@ -22,10 +22,10 @@ export default function AprovacoesScreen() {
             <View
               key={recipe.id}
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{recipe.nome}</Text>
               <Text style={[styles.info, { color: colors.mutedText }]}>{recipe.description}</Text>
-              <Text style={[styles.info, { color: colors.mutedText }]}>Categoria: {recipe.category}</Text>
-              <Text style={[styles.info, { color: colors.mutedText }]}>Autor mockado: {recipe.createdBy}</Text>
+              <Text style={[styles.info, { color: colors.mutedText }]}>Categoria: {recipe.refeicao}</Text>
+              <Text style={[styles.info, { color: colors.mutedText }]}>Autor mockado: {recipe.autor}</Text>
             </View>
           ))
         )}

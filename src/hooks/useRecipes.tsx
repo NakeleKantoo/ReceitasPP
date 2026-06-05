@@ -6,16 +6,16 @@ import { getCompatibleRecipes, getRecipeMissingRequirements } from '@/utils/reci
 import type { AvailableIngredient, Ingredient } from '@/types/ingredient';
 import type { Recipe } from '@/types/recipe';
 
+import * as recipeService from '@/services/recipeService';
+
 interface RecipesContextValue {
   allRecipes: Recipe[];
-  approvedRecipes: Recipe[];
-  pendingRecipes: Recipe[];
   categories: string[];
   ingredientCatalog: Ingredient[];
   latestAvailableIngredients: AvailableIngredient[];
   compatibleRecipes: Recipe[];
   isLoading: boolean;
-  getRecipeById: (recipeId: string) => Recipe | undefined;
+  getRecipeById: (recipeId: string) => Promise<Recipe | null>;
   getUserRecipes: (userId: string) => Recipe[];
   runCompatibilityCheck: (ingredients: AvailableIngredient[]) => Recipe[];
   clearCompatibilityResults: () => void;
@@ -31,37 +31,30 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setAllRecipes(getAllRecipes());
+    getAllRecipes().then((v) => {
+      if (v) {
+        setAllRecipes(v);
+      }
+    });
     setIsLoading(false);
   }, []);
-
-  const approvedRecipes = useMemo(
-    () => allRecipes.filter((recipe) => recipe.status === 'approved'),
-    [allRecipes]
-  );
-  const pendingRecipes = useMemo(
-    () => allRecipes.filter((recipe) => recipe.status === 'pending'),
-    [allRecipes]
-  );
   const categories = useMemo(
-    () => ['Todas', ...new Set(approvedRecipes.map((recipe) => recipe.category))],
-    [approvedRecipes]
+    () => ['Todas', ...new Set(allRecipes.map((recipe) => recipe.refeicao))],
+    [allRecipes]
   );
 
   const value = useMemo<RecipesContextValue>(
     () => ({
       allRecipes,
-      approvedRecipes,
-      pendingRecipes,
       categories,
       ingredientCatalog: mockIngredients,
       latestAvailableIngredients,
       compatibleRecipes,
       isLoading,
-      getRecipeById: (recipeId) => allRecipes.find((recipe) => recipe.id === recipeId),
-      getUserRecipes: (userId) => allRecipes.filter((recipe) => recipe.createdBy === userId),
+      getRecipeById: recipeService.getRecipeById,
+      getUserRecipes: (userId) => allRecipes.filter((recipe) => recipe.autor === userId),
       runCompatibilityCheck: (ingredients) => {
-        const results = getCompatibleRecipes(approvedRecipes, ingredients, mockIngredients);
+        const results = getCompatibleRecipes(allRecipes, ingredients, mockIngredients);
         setLatestAvailableIngredients(ingredients);
         setCompatibleRecipes(results);
         return results;
@@ -81,8 +74,6 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
     }),
     [
       allRecipes,
-      approvedRecipes,
-      pendingRecipes,
       categories,
       latestAvailableIngredients,
       compatibleRecipes,

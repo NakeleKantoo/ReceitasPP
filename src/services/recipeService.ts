@@ -1,25 +1,17 @@
-import { mockRecipes } from '@/data/mockRecipes';
+import { fetchReceitaById, fetchReceitas } from "@/utils/endpoints";
 
-export function getAllRecipes() {
-  return [...mockRecipes];
-}
-
-export function getApprovedRecipes() {
-  return mockRecipes.filter((recipe) => recipe.status === 'approved');
-}
-
-export function getPendingRecipes() {
-  return mockRecipes.filter((recipe) => recipe.status === 'pending');
+export async function getAllRecipes() {
+  return await fetchReceitas();
 }
 
 export function getCategories() {
-  return [...new Set(getApprovedRecipes().map((recipe) => recipe.category))];
+  return ['Café da manhã', 'Almoço', 'Janta', 'Lanche', 'Lanche rápido'];
 }
 
-export function getRecipeById(recipeId: string) {
-  return mockRecipes.find((recipe) => recipe.id === recipeId);
+export async function getRecipeById(recipeId: string) {
+  return await fetchReceitaById(recipeId); //implementar
 }
 
 export function getUserRecipes(userId: string) {
-  return mockRecipes.filter((recipe) => recipe.createdBy === userId);
+  return null; //implementar
 }

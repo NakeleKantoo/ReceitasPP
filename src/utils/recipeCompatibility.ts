@@ -13,7 +13,7 @@ export interface MissingRequirement {
 }
 
 function getIngredientName(catalog: Ingredient[], ingredientId: string) {
-  return catalog.find((ingredient) => ingredient.id === ingredientId)?.name ?? ingredientId;
+  return catalog.find((ingredient) => ingredient.id === ingredientId)?.nome ?? ingredientId;
 }
 
 export function getRecipeMissingRequirements(
@@ -23,29 +23,29 @@ export function getRecipeMissingRequirements(
 ) {
   const issues: MissingRequirement[] = [];
 
-  for (const required of recipe.ingredients) {
+  for (const required of recipe.ingredientes) {
     const available = availableIngredients.find(
-      (ingredient) => ingredient.ingredientId === required.ingredientId
+      (ingredient) => ingredient.ingredientId === required.id
     );
 
     if (!available) {
       issues.push({
-        ingredientId: required.ingredientId,
-        ingredientName: getIngredientName(ingredientCatalog, required.ingredientId),
+        ingredientId: required.id,
+        ingredientName: getIngredientName(ingredientCatalog, required.id),
         reason: 'missing',
-        requiredQuantity: required.quantity,
+        requiredQuantity: required.quantidade,
         availableQuantity: 0,
         unit: required.unit,
       });
       continue;
     }
 
-    if (available.unit !== required.unit || available.quantity < required.quantity) {
+    if (available.unit !== required.unit || available.quantity < required.quantidade) {
       issues.push({
-        ingredientId: required.ingredientId,
-        ingredientName: getIngredientName(ingredientCatalog, required.ingredientId),
+        ingredientId: required.id,
+        ingredientName: getIngredientName(ingredientCatalog, required.id),
         reason: 'insufficient',
-        requiredQuantity: required.quantity,
+        requiredQuantity: required.quantidade,
         availableQuantity: available.quantity,
         unit: required.unit,
       });

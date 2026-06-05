@@ -15,6 +15,7 @@ import { AppDataSource } from "./data-source.js";
 import { Ingrediente } from "./entity/Ingrediente.js";
 import { Receita } from "./entity/Receita.js";
 import { Usuario } from "./entity/Usuario.js";
+import { IngredienteReceita } from "./entity/IngredienteReceita.js";
 import { resumeToPipeableStream } from "react-dom/server";
 
 AppDataSource.initialize().then(
@@ -24,6 +25,7 @@ AppDataSource.initialize().then(
 const usuarioRepo = AppDataSource.getRepository(Usuario);
 const receitaRepo = AppDataSource.getRepository(Receita);
 const ingredienteRepo = AppDataSource.getRepository(Ingrediente);
+const ingredienteReceitaRepo = AppDataSource.getRepository(IngredienteReceita);
 
 const app = express();
 
@@ -79,7 +81,9 @@ app.post('/login', async (req, res) => {
                 }
             );
 
-            res.status(202).json({ message: 'Login bem sucedido', token });
+            const usuario = await usuarioRepo.findOne({where: {id:user.id}});
+
+            res.status(202).json({ message: 'Login bem sucedido', token, usuario});
         } else { throw 'fuck'; }
 
     } catch (err) {
@@ -121,7 +125,13 @@ app.post('/register', async (req, res) => {
 
 
 app.get('/receitas', checkAuth, async (req, res) => {
-    const result = await receitaRepo.find({ 'relations': { 'ingredientes': true, 'autor': true } });
+    const result = await receitaRepo.find({ 'relations': { 'ingredientes': {'ingrediente': true}, 'autor': true } });
+    res.status(200).json(result);
+});
+
+app.get('/receitas/:id', checkAuth, async (req, res) => {
+    const id = req.params.id;
+    const result = await receitaRepo.findOne({'where': {id}, 'relations': { 'ingredientes': {'ingrediente': true}, 'autor': true } });
     res.status(200).json(result);
 });
 
@@ -154,22 +164,29 @@ app.put('/receitas/ingredientes', checkAuth, async (req, res) => {
     try {
         const { id, ingredientes } = req.body;
 
-        const receita = await receitaRepo.findOne({'relations': {'ingredientes':true}, 'where': {'id': id}});
+        const receita = await receitaRepo.findOneBy({ id });
+        if (!receita) {
+            return res.status(404).json({ message: 'Receita não encontrada' });
+        }
 
-        const newIngredientes = []
+        await ingredienteReceitaRepo.delete({ receita: { id } });
 
-        ingredientes.forEach(async i => {
-            const ingrediente = await ingredienteRepo.findOneBy({id:i});
-            newIngredientes.push(ingrediente);
+        const novosVinculos = Object.keys(ingredientes).map((ingredienteId) => {
+            return ingredienteReceitaRepo.create({
+                receita: { id },
+                ingrediente: { id: Number(ingredienteId) },
+                quantidade: ingredientes[ingredienteId]
+            });
         });
 
-        receita['ingredientes'] = newIngredientes;
+        
+        await ingredienteReceitaRepo.save(novosVinculos);
 
-        await receitaRepo.save(receita);
+        const newReceita = await receitaRepo.findOne({where: {id}, relations: {'ingredientes': {'ingrediente': true}}});
 
-        res.status(201).json({ message: 'Receita atualizada com sucesso', receita });
+        res.status(200).json({ message: 'Ingredientes da receita atualizados com sucesso', receita: newReceita });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(400).json({ message: 'Algo deu errado, tente novamente mais tarde' });
     }
 });

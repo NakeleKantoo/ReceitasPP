@@ -17,27 +17,27 @@ function AppNavigator() {
   const navigationTheme =
     colorScheme === 'dark'
       ? {
-          ...DarkTheme,
-          colors: {
-            ...DarkTheme.colors,
-            background: colors.background,
-            card: colors.surface,
-            primary: colors.primary,
-            text: colors.text,
-            border: colors.border,
-          },
-        }
+        ...DarkTheme,
+        colors: {
+          ...DarkTheme.colors,
+          background: colors.background,
+          card: colors.surface,
+          primary: colors.primary,
+          text: colors.text,
+          border: colors.border,
+        },
+      }
       : {
-          ...DefaultTheme,
-          colors: {
-            ...DefaultTheme.colors,
-            background: colors.background,
-            card: colors.surface,
-            primary: colors.primary,
-            text: colors.text,
-            border: colors.border,
-          },
-        };
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          background: colors.background,
+          card: colors.surface,
+          primary: colors.primary,
+          text: colors.text,
+          border: colors.border,
+        },
+      };
 
   if (isLoading) {
     return (
@@ -49,21 +49,23 @@ function AppNavigator() {
   }
 
   return (
-    <ThemeProvider value={navigationTheme}>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-        }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="cadastro" />
-        <Stack.Screen name="(user)" />
-        <Stack.Screen name="(admin)" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={navigationTheme}>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+          }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="cadastro" />
+          <Stack.Screen name="(user)" />
+          <Stack.Screen name="(admin)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

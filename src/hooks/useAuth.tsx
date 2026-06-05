@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function bootstrap() {
-      await initializeStorage();
       await refreshUser();
       setIsLoading(false);
     }

@@ -16,21 +16,20 @@ export const Receita = new EntitySchema({
       type: "text",
     },
     refeicao: {
-        type: "text"
+      type: "text"
     },
     tempoPreparo: {
-        type: 'int'
+      type: 'int'
     },
     porcoes: {
-        type: 'float'
+      type: 'float'
     },
+    createdAt: {
+      type: 'date',
+      createDate: true
+    }
   },
   relations: {
-    ingredientes: {
-        type: 'many-to-many',
-        target: 'Ingrediente',
-        inverseSide: 'receitas',
-    },
     usuarios: {
       type: 'many-to-many',
       target: 'Usuario',
@@ -39,8 +38,13 @@ export const Receita = new EntitySchema({
     autor: {
       type: 'many-to-one',
       target: 'Usuario',
-      joinColum: { name: 'autor_id'},
+      joinColumn: { name: 'autorId' },
       onDelete: "CASCADE"
+    },
+    ingredientes: {
+      type: "one-to-many",
+      target: "IngredienteReceita",
+      inverseSide: "receita" 
     }
   }
 });

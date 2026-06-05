@@ -9,7 +9,11 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
-import { formatDuration, formatServings, formatStatus, formatUnit } from '@/utils/formatters';
+import { formatDuration, formatServings, formatUnit } from '@/utils/formatters';
+import { useEffect, useState } from 'react';
+import { Recipe } from '@/types/recipe';
+
+import { ChevronRight } from 'lucide-react-native';
 
 export default function ReceitaDetalheScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,7 +21,15 @@ export default function ReceitaDetalheScreen() {
   const { ingredientCatalog, getRecipeById } = useRecipes();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const recipe = id ? getRecipeById(id) : undefined;
+  const [recipe, setRecipe] = useState(null as Recipe | null);
+
+  useEffect(() => {
+    async function populate(id:string) {
+      setRecipe(await getRecipeById(id));
+    }
+
+    populate(id);
+  }, [])
 
   if (!recipe) {
     return (
@@ -31,12 +43,11 @@ export default function ReceitaDetalheScreen() {
   }
 
   return (
-    <Screen title={recipe.title} subtitle={recipe.description}>
+    <Screen title={recipe.nome}>
       <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.meta, { color: colors.primary }]}>{recipe.category}</Text>
-        <Text style={[styles.meta, { color: colors.text }]}>{formatDuration(recipe.preparationTime)}</Text>
-        <Text style={[styles.meta, { color: colors.text }]}>{formatServings(recipe.servings)}</Text>
-        <Text style={[styles.meta, { color: colors.secondary }]}>{formatStatus(recipe.status)}</Text>
+        <Text style={[styles.meta, { color: colors.primary }]}>{recipe.refeicao}</Text>
+        <Text style={[styles.meta, { color: colors.text }]}>{formatDuration(recipe.tempoPreparo)}</Text>
+        <Text style={[styles.meta, { color: colors.text }]}>{formatServings(recipe.porcoes)}</Text>
       </View>
 
       <Button
@@ -49,23 +60,24 @@ export default function ReceitaDetalheScreen() {
 
       <SectionTitle title="Ingredientes" />
       <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {recipe.ingredients.map((ingredient) => {
-          const ingredientName =
-            ingredientCatalog.find((item) => item.id === ingredient.ingredientId)?.name ??
-            ingredient.ingredientId;
+        {recipe.ingredientes.map((ingredient) => {
+          const ingredientName = ingredient.ingrediente?.nome;
 
           return (
-            <Text key={`${recipe.id}-${ingredient.ingredientId}`} style={[styles.item, { color: colors.text }]}>
-              - {ingredientName}: {ingredient.quantity}
-              {formatUnit(ingredient.unit)}
+            <View key={`${recipe.id}-${ingredient.id}`} style={{flexDirection: 'row'}}>
+            <ChevronRight color={'#fff'}/>
+            <Text style={[styles.item, { color: colors.text }]}>
+              {ingredientName}: {ingredient.quantidade}
+              {formatUnit(ingredient.ingrediente?.unidade)}
             </Text>
+            </View>
           );
         })}
       </View>
 
       <SectionTitle title="Modo de preparo" />
       <View style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {recipe.preparationMode.map((step, index) => (
+        {recipe.passos.split('\n').map((step, index) => (
           <Text key={`${recipe.id}-step-${index}`} style={[styles.item, { color: colors.text }]}>
             {index + 1}. {step}
           </Text>

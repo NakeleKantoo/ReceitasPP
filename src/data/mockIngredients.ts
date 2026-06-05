@@ -1,16 +1,16 @@
 import type { Ingredient } from '@/types/ingredient';
 
 export const mockIngredients: Ingredient[] = [
-  { id: 'arroz', name: 'Arroz', unit: 'g' },
-  { id: 'feijao', name: 'Feijao', unit: 'g' },
-  { id: 'ovo', name: 'Ovo', unit: 'un' },
-  { id: 'leite', name: 'Leite', unit: 'ml' },
-  { id: 'farinha', name: 'Farinha', unit: 'g' },
-  { id: 'tomate', name: 'Tomate', unit: 'g' },
-  { id: 'queijo', name: 'Queijo', unit: 'g' },
-  { id: 'frango', name: 'Frango', unit: 'g' },
-  { id: 'macarrao', name: 'Macarrao', unit: 'g' },
-  { id: 'acucar', name: 'Acucar', unit: 'g' },
-  { id: 'sal', name: 'Sal', unit: 'g' },
-  { id: 'oleo', name: 'Oleo', unit: 'ml' },
+  { id: 'arroz', nome: 'Arroz', unidade: 'g' },
+  { id: 'feijao', nome: 'Feijao', unidade: 'g' },
+  { id: 'ovo', nome: 'Ovo', unidade: 'un' },
+  { id: 'leite', nome: 'Leite', unidade: 'ml' },
+  { id: 'farinha', nome: 'Farinha', unidade: 'g' },
+  { id: 'tomate', nome: 'Tomate', unidade: 'g' },
+  { id: 'queijo', nome: 'Queijo', unidade: 'g' },
+  { id: 'frango', nome: 'Frango', unidade: 'g' },
+  { id: 'macarrao', nome: 'Macarrao', unidade: 'g' },
+  { id: 'acucar', nome: 'Acucar', unidade: 'g' },
+  { id: 'sal', nome: 'Sal', unidade: 'g' },
+  { id: 'oleo', nome: 'Oleo', unidade: 'ml' },
 ];

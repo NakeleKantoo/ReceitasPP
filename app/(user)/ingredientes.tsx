@@ -52,7 +52,7 @@ export default function IngredientesScreen() {
       .map((ingredient) => ({
         ingredientId: ingredient.id,
         quantity: Number(selectionState[ingredient.id]?.quantity),
-        unit: ingredient.unit,
+        unit: ingredient.unidade,
       }));
 
     if (selectedIngredients.length === 0) {
@@ -90,11 +90,11 @@ export default function IngredientesScreen() {
           <IngredientQuantityInput
             key={ingredient.id}
             isSelected={selectionState[ingredient.id]?.selected ?? false}
-            label={ingredient.name}
+            label={ingredient.nome}
             onQuantityChange={(value) => handleQuantityChange(ingredient.id, value)}
             onToggle={() => handleToggle(ingredient.id)}
             quantity={selectionState[ingredient.id]?.quantity ?? ''}
-            unit={ingredient.unit}
+            unit={ingredient.unidade}
           />
         ))}
       </View>

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { spacing } from '@/theme/spacing';
-import { formatDuration, formatServings, formatStatus } from '@/utils/formatters';
+import { formatDuration, formatServings } from '@/utils/formatters';
 import type { Recipe } from '@/types/recipe';
 
 interface RecipeCardProps {
@@ -37,8 +37,8 @@ export function RecipeCard({
       ]}>
       <View style={styles.header}>
         <View style={styles.titleBlock}>
-          <Text style={[styles.title, { color: colors.text }]}>{recipe.title}</Text>
-          <Text style={[styles.category, { color: colors.primary }]}>{recipe.category}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{recipe.nome}</Text>
+          <Text style={[styles.category, { color: colors.primary }]}>{recipe.refeicao}</Text>
         </View>
         {onToggleFavorite ? (
           <Pressable
@@ -52,13 +52,9 @@ export function RecipeCard({
           </Pressable>
         ) : null}
       </View>
-      <Text style={[styles.description, { color: colors.mutedText }]}>{recipe.description}</Text>
       <View style={styles.metaRow}>
-        <Text style={[styles.metaText, { color: colors.text }]}>{formatDuration(recipe.preparationTime)}</Text>
-        <Text style={[styles.metaText, { color: colors.text }]}>{formatServings(recipe.servings)}</Text>
-        {statusLabel ? (
-          <Text style={[styles.metaText, { color: colors.secondary }]}>{formatStatus(recipe.status)}</Text>
-        ) : null}
+        <Text style={[styles.metaText, { color: colors.text }]}>{formatDuration(recipe.tempoPreparo)}</Text>
+        <Text style={[styles.metaText, { color: colors.text }]}>{formatServings(recipe.porcoes)}</Text>
       </View>
     </Pressable>
   );

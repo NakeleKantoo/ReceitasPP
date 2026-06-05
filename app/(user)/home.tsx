@@ -14,15 +14,15 @@ export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { user } = useAuth();
-  const { approvedRecipes, getUserRecipes } = useRecipes();
+  const { allRecipes, getUserRecipes } = useRecipes();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const featuredRecipes = approvedRecipes?.slice(0, 3);
+  const featuredRecipes = allRecipes?.slice(0, 3);
   const myRecipesCount = user ? getUserRecipes(user.id).length : 0;
 
   return (
     <Screen
-      title={`Ola, ${user?.username.split(' ')[0] ?? 'chef'}!`}
+      title={`Ola, ${user?.username?.split(' ')[0] ?? 'chef'}!`}
       subtitle="Escolha uma forma rapida de encontrar receitas que funcionem com a sua despensa.">
       <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.bannerTitle, { color: colors.text }]}>Seu atalho na cozinha</Text>
@@ -50,12 +50,12 @@ export default function HomeScreen() {
         />
         <QuickAction
           title="Minhas receitas"
-          description={`${myRecipesCount} receita(s) vinculada(s) ao seu usuario mockado.`}
+          description={`${myRecipesCount} receita(s) vinculada(s) ao seu usuario.`}
           onPress={() => router.push('/(user)/minhas-receitas')}
         />
       </View>
 
-      <SectionTitle title="Receitas em destaque" subtitle="Sugestoes aprovadas para comecar rapido." />
+      <SectionTitle title="Receitas novas" />
       <View style={styles.list}>
         {featuredRecipes.map((recipe) => (
           <RecipeCard
