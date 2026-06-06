@@ -39,38 +39,44 @@ export default function LoginScreen() {
     <Screen
       title="Entrar"
       subtitle="Use uma conta comum para o fluxo principal do app ou uma conta superadmin para a area administrativa."
-      scroll={false}>
-      <View style={styles.form}>
+      scroll={false}
+      contentWidth="narrow"
+      headerAlign="center">
+      <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.helper, { color: colors.mutedText }]}>
+          Informe suas credenciais para acessar suas receitas ou o painel administrativo.
+        </Text>
+
+        <View style={styles.form}>
         <Input label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" />
         <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
         {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
         <Button title="Entrar" onPress={() => void handleLogin()} loading={isSubmitting} />
         <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
+        </View>
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  formCard: {
+    borderRadius: 26,
+    borderWidth: 1,
+    gap: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.xl,
+  },
   form: {
     gap: spacing.md,
   },
-  error: {
-    fontSize: 13,
-  },
-  demoCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: spacing.sm,
-    marginTop: 'auto',
-    padding: spacing.xl,
-  },
-  demoTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  demoText: {
+  helper: {
     fontSize: 14,
     lineHeight: 21,
+    textAlign: 'center',
+  },
+  error: {
+    fontSize: 13,
+    textAlign: 'center',
   },
 });

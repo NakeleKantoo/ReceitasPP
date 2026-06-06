@@ -11,6 +11,8 @@ interface ScreenProps {
   children: React.ReactNode;
   scroll?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  contentWidth?: 'default' | 'narrow';
+  headerAlign?: 'start' | 'center';
 }
 
 export function Screen({
@@ -19,9 +21,12 @@ export function Screen({
   children,
   scroll = true,
   contentStyle,
+  contentWidth = 'default',
+  headerAlign = 'start',
 }: ScreenProps) {
   const { colors } = useAppTheme();
   const Container = scroll ? ScrollView : View;
+  const isCenteredHeader = headerAlign === 'center';
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
@@ -33,12 +38,17 @@ export function Screen({
           contentStyle,
         ]}>
         {title ? (
-          <View style={styles.header}>
+          <View
+            style={[
+              styles.header,
+              contentWidth === 'narrow' && styles.narrowContent,
+              isCenteredHeader && styles.headerCentered,
+            ]}>
             <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
             {subtitle ? <Text style={[styles.subtitle, { color: colors.mutedText }]}>{subtitle}</Text> : null}
           </View>
         ) : null}
-        {children}
+        <View style={[contentWidth === 'narrow' && styles.narrowContent, styles.childrenWrapper]}>{children}</View>
       </Container>
     </SafeAreaView>
   );
@@ -54,14 +64,26 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     gap: spacing.lg,
-    padding: spacing.xl,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
     paddingBottom: spacing.xxxl,
   },
   nonScrollContent: {
     flex: 1,
   },
+  childrenWrapper: {
+    gap: spacing.lg,
+  },
   header: {
     gap: spacing.xs,
+  },
+  headerCentered: {
+    alignItems: 'center',
+  },
+  narrowContent: {
+    alignSelf: 'center',
+    maxWidth: 430,
+    width: '100%',
   },
   title: {
     fontSize: typography.titleLarge,
@@ -70,5 +92,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: typography.body,
     lineHeight: 22,
+    maxWidth: 360,
   },
 });

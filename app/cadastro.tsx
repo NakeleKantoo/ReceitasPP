@@ -56,24 +56,45 @@ export default function CadastroScreen() {
     <Screen
       title="Criar conta"
       subtitle="O cadastro cria um novo usuario comum e ja abre a area interna com sessao persistida localmente."
-      scroll={false}>
-      <View style={styles.form}>
+      scroll={false}
+      contentWidth="narrow"
+      headerAlign="center">
+      <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.helper, { color: colors.mutedText }]}>
+          Preencha seus dados para acessar o app e comecar a montar sua despensa inteligente.
+        </Text>
+
+        <View style={styles.form}>
         <Input label="Nome" value={name} onChangeText={setName} />
         <Input label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" />
         <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
         {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
         <Button title="Cadastrar" onPress={() => void handleRegister()} loading={isSubmitting} />
         <Button title="Ja tenho conta" onPress={() => router.push('/login')} variant="ghost" />
+        </View>
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  formCard: {
+    borderRadius: 26,
+    borderWidth: 1,
+    gap: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.xl,
+  },
   form: {
     gap: spacing.md,
   },
+  helper: {
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+  },
   error: {
     fontSize: 13,
+    textAlign: 'center',
   },
 });
