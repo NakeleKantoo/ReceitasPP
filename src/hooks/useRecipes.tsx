@@ -8,6 +8,7 @@ import {
   getIngredientCatalogFallback,
   getUserRecipes as getRecipesForUser,
 } from '@/services/recipeService';
+import { useAuth } from '@/hooks/useAuth';
 import { getCompatibleRecipes, getRecipeMissingRequirements } from '@/utils/recipeCompatibility';
 import type { AvailableIngredient, Ingredient } from '@/types/ingredient';
 import type { Recipe } from '@/types/recipe';
@@ -35,6 +36,7 @@ interface RecipesContextValue {
 const RecipesContext = createContext<RecipesContextValue | undefined>(undefined);
 
 export function RecipesProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
   const [ingredientCatalog, setIngredientCatalog] = useState<Ingredient[]>(getIngredientCatalogFallback());
   const [latestAvailableIngredients, setLatestAvailableIngredients] = useState<AvailableIngredient[]>([]);
@@ -42,12 +44,23 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshRecipes = async () => {
+    if (!user) {
+      setAllRecipes([]);
+      setIngredientCatalog(getIngredientCatalogFallback());
+      setCompatibleRecipes([]);
+      setLatestAvailableIngredients([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const [recipes, ingredients] = await Promise.all([getAllRecipes(), getAllIngredients()]);
       setAllRecipes(recipes);
       setIngredientCatalog(ingredients);
+    } catch (error) {
+      console.warn('[RecipesProvider] Falha ao carregar receitas ou ingredientes:', error);
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +68,7 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void refreshRecipes();
-  }, []);
+  }, [user?.id]);
 
   const approvedRecipes = useMemo(() => filterRecipesByStatus(allRecipes, 'approved'), [allRecipes]);
   const pendingRecipes = useMemo(() => filterRecipesByStatus(allRecipes, 'pending'), [allRecipes]);

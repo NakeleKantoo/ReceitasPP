@@ -13,11 +13,24 @@ import { IngredienteReceita } from "./entity/IngredienteReceita.js";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "receitaspp-dev-secret";
+const PORT = 3069;
+const HOST = "0.0.0.0";
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    message: "Receitas++ backend online.",
+    health: "/health",
+  });
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 const usuarioRepo = AppDataSource.getRepository(Usuario);
 const receitaRepo = AppDataSource.getRepository(Receita);
@@ -590,8 +603,10 @@ app.get("/admin/reports", checkAuth, checkAdmin, async (_req, res) => {
 AppDataSource.initialize()
   .then(async () => {
     await seedDatabase();
-    app.listen(3069, () => {
-      console.log("Receitas++ backend executando em http://127.0.0.1:3069/");
+    app.listen(PORT, HOST, () => {
+      console.log(`Receitas++ backend executando em http://${HOST}:${PORT}/`);
+      console.log(`Teste local: http://127.0.0.1:${PORT}/health`);
+      console.log(`Android Emulator: http://10.0.2.2:${PORT}/health`);
     });
   })
   .catch((error) => {

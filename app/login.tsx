@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
@@ -18,12 +18,6 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      router.replace(user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
-    }
-  }, [router, user]);
-
   const handleLogin = async () => {
     try {
       setIsSubmitting(true);
@@ -38,7 +32,7 @@ export default function LoginScreen() {
   };
 
   if (user) {
-    return null;
+    return <Redirect href={user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home'} />;
   }
 
   return (

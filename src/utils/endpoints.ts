@@ -10,6 +10,12 @@ interface AuthApiResponse {
   usuario: User;
 }
 
+interface RequestOptions {
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  withAuth?: boolean;
+  body?: unknown;
+}
+
 async function buildHeaders(withAuth = false) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -52,109 +58,107 @@ async function persistAuthPayload(payload: AuthApiResponse) {
   ]);
 }
 
-export async function registerOnline(username: string, email: string, password: string) {
-  const response = await fetch(`${RECEITAS_API.base_url}register`, {
-    method: 'POST',
-    headers: await buildHeaders(),
-    body: JSON.stringify({ username, email, password }),
-  });
+async function requestJson<T>(path: string, options: RequestOptions) {
+  const url = `${RECEITAS_API.base_url}${path}`;
 
-  const payload = await parseResponse<AuthApiResponse>(response);
+  try {
+    const response = await fetch(url, {
+      method: options.method,
+      headers: await buildHeaders(options.withAuth),
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+
+    return await parseResponse<T>(response);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        `Falha de rede ao acessar ${url}. Verifique se o backend esta ativo e se a URL da API esta acessivel a partir do Android.`
+      );
+    }
+
+    throw error;
+  }
+}
+
+export async function registerOnline(username: string, email: string, password: string) {
+  const payload = await requestJson<AuthApiResponse>('register', {
+    method: 'POST',
+    body: { username, email, password },
+  });
   await persistAuthPayload(payload);
   return payload.usuario;
 }
 
 export async function loginOnline(email: string, password: string) {
-  const response = await fetch(`${RECEITAS_API.base_url}login`, {
+  const payload = await requestJson<AuthApiResponse>('login', {
     method: 'POST',
-    headers: await buildHeaders(),
-    body: JSON.stringify({ email, password }),
+    body: { email, password },
   });
-
-  const payload = await parseResponse<AuthApiResponse>(response);
   await persistAuthPayload(payload);
   return payload.usuario;
 }
 
 export async function fetchReceitas() {
-  const response = await fetch(`${RECEITAS_API.base_url}receitas`, {
+  return await requestJson<Recipe[]>('receitas', {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<Recipe[]>(response);
 }
 
 export async function fetchReceitaById(id: number | string) {
-  const response = await fetch(`${RECEITAS_API.base_url}receitas/${id}`, {
+  return await requestJson<Recipe>(`receitas/${id}`, {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<Recipe>(response);
 }
 
 export async function fetchIngredientes() {
-  const response = await fetch(`${RECEITAS_API.base_url}ingredientes`, {
+  return await requestJson<Ingredient[]>('ingredientes', {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<Ingredient[]>(response);
 }
 
 export async function fetchAdminDashboard() {
-  const response = await fetch(`${RECEITAS_API.base_url}admin/dashboard`, {
+  return await requestJson<AdminDashboardStats>('admin/dashboard', {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<AdminDashboardStats>(response);
 }
 
 export async function fetchAdminReports() {
-  const response = await fetch(`${RECEITAS_API.base_url}admin/reports`, {
+  return await requestJson<AdminReports>('admin/reports', {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<AdminReports>(response);
 }
 
 export async function fetchAdminUsers() {
-  const response = await fetch(`${RECEITAS_API.base_url}admin/users`, {
+  return await requestJson<User[]>('admin/users', {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<User[]>(response);
 }
 
 export async function fetchAdminRecipes(status?: RecipeStatus) {
   const query = status ? `?status=${status}` : '';
-  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes${query}`, {
+  return await requestJson<Recipe[]>(`admin/recipes${query}`, {
     method: 'GET',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<Recipe[]>(response);
 }
 
 export async function updateAdminRecipeStatus(recipeId: number, status: RecipeStatus) {
-  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes/${recipeId}/status`, {
+  return await requestJson<Recipe>(`admin/recipes/${recipeId}/status`, {
     method: 'PATCH',
-    headers: await buildHeaders(true),
-    body: JSON.stringify({ status }),
+    withAuth: true,
+    body: { status },
   });
-
-  return parseResponse<Recipe>(response);
 }
 
 export async function deleteAdminRecipe(recipeId: number) {
-  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes/${recipeId}`, {
+  return await requestJson<{ id: number; message: string }>(`admin/recipes/${recipeId}`, {
     method: 'DELETE',
-    headers: await buildHeaders(true),
+    withAuth: true,
   });
-
-  return parseResponse<{ id: number; message: string }>(response);
 }

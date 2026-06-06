@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -8,42 +7,33 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { spacing } from '@/theme/spacing';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 export default function EntryScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      router.replace(user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home');
-    }
-  }, [router, user]);
-
   if (user) {
-    return null;
+    return <Redirect href={user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home'} />;
   }
 
   return (
+    <Screen
+      title="Receitas++"
+      subtitle="Descubra receitas inteligentes com base no que voce tem em casa, com acesso separado para usuario comum e Superadmin."
+      scroll={false}>
+      <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Text style={[styles.kicker, { color: colors.primary }]}>Tela Inicial</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Entre, crie sua conta e comece a cozinhar com mais criterio.</Text>
+        <Text style={[styles.description, { color: colors.mutedText }]}>
+          Busque receitas, filtre por ingredientes e quantidades disponiveis, salve favoritas e acompanhe o fluxo administrativo quando necessario.
+        </Text>
+      </View>
 
-    <SafeAreaView>
-      <Screen scroll={false}>
-        <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.kicker, { color: colors.primary }]}>Receitas++</Text>
-          <Text style={[styles.title, { color: colors.text }]}>Receitas inteligentes com o que voce ja tem em casa</Text>
-          <Text style={[styles.description, { color: colors.mutedText }]}>
-            Entre com uma conta de teste ou crie um usuario comum para buscar receitas, ver detalhes e
-            descobrir quais pratos sao realmente possiveis com a sua despensa.
-          </Text>
-        </View>
-
-        <View style={styles.actions}>
-          <Button title="Entrar" onPress={() => router.push('/login')} />
-          <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
-        </View>
-      </Screen>
-    </SafeAreaView>
+      <View style={styles.actions}>
+        <Button title="Entrar" onPress={() => router.push('/login')} />
+        <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
+      </View>
+    </Screen>
   );
 }
 
