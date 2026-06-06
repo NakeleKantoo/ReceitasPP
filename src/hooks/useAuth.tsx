@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import * as authService from '@/services/authService';
-import { initializeStorage } from '@/services/storageService';
 import type { User } from '@/types/user';
 
 interface AuthContextValue {
@@ -26,8 +25,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function bootstrap() {
-      await refreshUser();
-      setIsLoading(false);
+      try {
+        await refreshUser();
+      } catch (error) {
+        console.warn('[AuthProvider] Falha ao restaurar sessao:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     void bootstrap();
