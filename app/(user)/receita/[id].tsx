@@ -11,25 +11,27 @@ import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
 import { formatDuration, formatServings, formatUnit } from '@/utils/formatters';
 import { useEffect, useState } from 'react';
-import { Recipe } from '@/types/recipe';
-
-import { ChevronRight } from 'lucide-react-native';
+import type { Recipe } from '@/types/recipe';
 
 export default function ReceitaDetalheScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useAppTheme();
-  const { ingredientCatalog, getRecipeById } = useRecipes();
+  const { getRecipeById } = useRecipes();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const [recipe, setRecipe] = useState(null as Recipe | null);
 
   useEffect(() => {
-    async function populate(id:string) {
-      setRecipe(await getRecipeById(id));
+    async function populate() {
+      if (!id) {
+        return;
+      }
+
+      setRecipe(await getRecipeById(Number(id)));
     }
 
-    populate(id);
-  }, [])
+    void populate();
+  }, [getRecipeById, id]);
 
   if (!recipe) {
     return (
@@ -64,12 +66,12 @@ export default function ReceitaDetalheScreen() {
           const ingredientName = ingredient.ingrediente?.nome;
 
           return (
-            <View key={`${recipe.id}-${ingredient.id}`} style={{flexDirection: 'row'}}>
-            <ChevronRight color={'#fff'}/>
-            <Text style={[styles.item, { color: colors.text }]}>
-              {ingredientName}: {ingredient.quantidade}
-              {formatUnit(ingredient.ingrediente?.unidade)}
-            </Text>
+            <View key={`${recipe.id}-${ingredient.id}`} style={styles.ingredientRow}>
+              <Text style={[styles.bullet, { color: colors.primary }]}>-</Text>
+              <Text style={[styles.item, { color: colors.text }]}>
+                {ingredientName}: {ingredient.quantidade}
+                {formatUnit(ingredient.ingrediente?.unidade)}
+              </Text>
             </View>
           );
         })}
@@ -108,6 +110,15 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 15,
+    lineHeight: 22,
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  bullet: {
+    fontSize: 18,
+    fontWeight: '700',
     lineHeight: 22,
   },
 });

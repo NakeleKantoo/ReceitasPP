@@ -22,6 +22,11 @@ export function RecipeCard({
   statusLabel = false,
 }: RecipeCardProps) {
   const { colors } = useAppTheme();
+  const statusText = {
+    pending: 'Pendente',
+    approved: 'Aprovada',
+    rejected: 'Rejeitada',
+  }[recipe.status];
 
   return (
     <Pressable
@@ -55,6 +60,9 @@ export function RecipeCard({
       <View style={styles.metaRow}>
         <Text style={[styles.metaText, { color: colors.text }]}>{formatDuration(recipe.tempoPreparo)}</Text>
         <Text style={[styles.metaText, { color: colors.text }]}>{formatServings(recipe.porcoes)}</Text>
+        {statusLabel ? (
+          <Text style={[styles.metaText, { color: colors.secondary }]}>Status: {statusText}</Text>
+        ) : null}
       </View>
     </Pressable>
   );

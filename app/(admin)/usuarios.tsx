@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { getAllUsers } from '@/services/adminService';
@@ -12,12 +13,18 @@ export default function UsuariosScreen() {
   const { colors } = useAppTheme();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function loadUsers() {
-      const nextUsers = await getAllUsers();
-      setUsers(nextUsers);
-      setIsLoading(false);
+      try {
+        setError('');
+        setUsers(await getAllUsers());
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : 'Nao foi possivel carregar os usuarios.');
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     void loadUsers();
@@ -26,13 +33,17 @@ export default function UsuariosScreen() {
   return (
     <Screen
       title="Usuarios cadastrados"
-      subtitle="Lista de perfis persistidos localmente para os fluxos de login e administracao.">
+      subtitle="Lista real de usuarios cadastrados no backend com seus respectivos perfis.">
       <View style={styles.list}>
         {isLoading ? (
           <View style={styles.loadingState}>
             <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={[styles.info, { color: colors.mutedText }]}>Carregando usuarios locais...</Text>
+            <Text style={[styles.info, { color: colors.mutedText }]}>Carregando usuarios...</Text>
           </View>
+        ) : error ? (
+          <EmptyState title="Falha ao carregar usuarios" description={error} />
+        ) : users.length === 0 ? (
+          <EmptyState title="Nenhum usuario encontrado" description="Ainda nao existem usuarios cadastrados." />
         ) : (
           users.map((user) => (
             <View

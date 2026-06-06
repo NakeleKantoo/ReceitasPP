@@ -9,7 +9,7 @@ export function validatePositiveNumber(value: number) {
 }
 
 export function hasDuplicateIngredientIds(ingredients: RecipeIngredient[]) {
-  const ids = ingredients.map((ingredient) => ingredient.id);
+  const ids = ingredients.map((ingredient) => ingredient.ingrediente.id);
   return new Set(ids).size !== ids.length;
 }
 
@@ -23,39 +23,35 @@ export function normalizePreparationMode(value: string) {
 export function validateRecipeInput(input: NewRecipeInput) {
   const errors: string[] = [];
 
-  if (!input.title.trim()) {
-    errors.push('Informe o titulo da receita.');
+  if (!input.nome.trim()) {
+    errors.push('Informe o nome da receita.');
   }
 
-  if (!input.description.trim()) {
-    errors.push('Informe uma descricao curta.');
-  }
-
-  if (!input.category.trim()) {
+  if (!input.refeicao.trim()) {
     errors.push('Informe a categoria da receita.');
   }
 
-  if (!validatePositiveNumber(input.preparationTime)) {
+  if (!validatePositiveNumber(input.tempoPreparo)) {
     errors.push('O tempo de preparo precisa ser maior que zero.');
   }
 
-  if (!validatePositiveNumber(input.servings)) {
+  if (!validatePositiveNumber(input.porcoes)) {
     errors.push('O numero de porcoes precisa ser maior que zero.');
   }
 
-  if (input.ingredients.length === 0) {
+  if (input.ingredientes.length === 0) {
     errors.push('Adicione pelo menos um ingrediente.');
   }
 
-  if (hasDuplicateIngredientIds(input.ingredients)) {
+  if (hasDuplicateIngredientIds(input.ingredientes)) {
     errors.push('Nao e permitido repetir o mesmo ingrediente na receita.');
   }
 
-  if (input.ingredients.some((ingredient) => !validatePositiveNumber(ingredient.quantity))) {
+  if (input.ingredientes.some((ingredient) => !validatePositiveNumber(ingredient.quantidade))) {
     errors.push('Todas as quantidades de ingredientes precisam ser maiores que zero.');
   }
 
-  if (input.preparationMode.length === 0) {
+  if (normalizePreparationMode(input.passos).length === 0) {
     errors.push('Informe o modo de preparo em pelo menos uma etapa.');
   }
 

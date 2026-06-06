@@ -5,13 +5,13 @@ import {
   saveStoredFavorites,
 } from '@/services/storageService';
 
-export async function getUserFavorites(userId: string) {
+export async function getUserFavorites(userId: number) {
   await initializeStorage();
   const favorites = await getStoredFavorites();
   return favorites.filter((favorite) => favorite.userId === userId);
 }
 
-export async function toggleFavorite(userId: string, recipeId: string) {
+export async function toggleFavorite(userId: number, recipeId: number) {
   await initializeStorage();
   const favorites = await getStoredFavorites();
   const existingFavorite = favorites.find(
@@ -44,7 +44,7 @@ export async function toggleFavorite(userId: string, recipeId: string) {
   };
 }
 
-export async function removeFavorite(userId: string, recipeId: string) {
+export async function removeFavorite(userId: number, recipeId: number) {
   await initializeStorage();
   const favorites = await getStoredFavorites();
   const nextFavorites = favorites.filter(

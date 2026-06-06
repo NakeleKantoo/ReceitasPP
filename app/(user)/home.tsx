@@ -14,10 +14,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { user } = useAuth();
-  const { allRecipes, getUserRecipes } = useRecipes();
+  const { approvedRecipes, getUserRecipes } = useRecipes();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const featuredRecipes = allRecipes?.slice(0, 3);
+  const featuredRecipes = approvedRecipes.slice(0, 3);
   const myRecipesCount = user ? getUserRecipes(user.id).length : 0;
 
   return (

@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { IngredientQuantityInput } from '@/components/IngredientQuantityInput';
@@ -26,7 +26,21 @@ export default function IngredientesScreen() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleToggle = (ingredientId: string) => {
+  useEffect(() => {
+    setSelectionState(
+      Object.fromEntries(
+        ingredientCatalog.map((ingredient) => [
+          ingredient.id,
+          {
+            selected: false,
+            quantity: '',
+          },
+        ])
+      )
+    );
+  }, [ingredientCatalog]);
+
+  const handleToggle = (ingredientId: number) => {
     setSelectionState((currentState) => ({
       ...currentState,
       [ingredientId]: {
@@ -36,7 +50,7 @@ export default function IngredientesScreen() {
     }));
   };
 
-  const handleQuantityChange = (ingredientId: string, quantity: string) => {
+  const handleQuantityChange = (ingredientId: number, quantity: string) => {
     setSelectionState((currentState) => ({
       ...currentState,
       [ingredientId]: {
