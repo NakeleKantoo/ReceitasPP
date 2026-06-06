@@ -20,16 +20,21 @@ export default function EntryScreen() {
     <Screen
       title="Receitas++"
       subtitle="Descubra receitas inteligentes com base no que voce tem em casa, com acesso separado para usuario comum e Superadmin."
-      scroll={false}>
+      scroll={false}
+      contentWidth="narrow"
+      headerAlign="center">
       <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.kicker, { color: colors.primary }]}>Tela Inicial</Text>
-        <Text style={[styles.title, { color: colors.text }]}>Entre, crie sua conta e comece a cozinhar com mais criterio.</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Entre, crie sua conta e comece a cozinhar com mais criterio.
+        </Text>
         <Text style={[styles.description, { color: colors.mutedText }]}>
-          Busque receitas, filtre por ingredientes e quantidades disponiveis, salve favoritas e acompanhe o fluxo administrativo quando necessario.
+          Busque receitas, filtre por ingredientes e quantidades disponiveis, salve favoritas e
+          acompanhe o fluxo administrativo quando necessario.
         </Text>
       </View>
 
-      <View style={styles.actions}>
+      <View style={[styles.actions, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Button title="Entrar" onPress={() => router.push('/login')} />
         <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
       </View>
@@ -41,25 +46,32 @@ const styles = StyleSheet.create({
   hero: {
     borderRadius: 28,
     borderWidth: 1,
-    gap: spacing.md,
+    gap: spacing.lg,
+    marginTop: spacing.md,
     padding: spacing.xxl,
   },
   kicker: {
+    alignSelf: 'center',
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
-    lineHeight: 38,
+    lineHeight: 36,
+    textAlign: 'center',
   },
   description: {
     fontSize: 16,
     lineHeight: 24,
+    textAlign: 'center',
   },
   actions: {
     gap: spacing.md,
+    borderRadius: 24,
+    borderWidth: 1,
     marginTop: 'auto',
+    padding: spacing.xl,
   },
 });
