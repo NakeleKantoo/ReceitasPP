@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
@@ -14,18 +15,20 @@ export default function RelatoriosScreen() {
   const [reports, setReports] = useState<AdminReports | null>(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function loadReports() {
-      try {
-        setError('');
-        setReports(await getAdminReports());
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Nao foi possivel carregar os relatorios.');
-      }
+  const loadReports = useCallback(async () => {
+    try {
+      setError('');
+      setReports(await getAdminReports());
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'Nao foi possivel carregar os relatorios.');
     }
-
-    void loadReports();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadReports();
+    }, [loadReports])
+  );
 
   if (!reports && !error) {
     return (
