@@ -55,13 +55,15 @@ export default function CadastroScreen() {
   return (
     <Screen
       title="Criar conta"
-      subtitle="O cadastro cria um novo usuario comum e ja abre a area interna com sessao persistida localmente."
+      subtitle="O cadastro cria um novo usuário comum e já abre a área interna com sessão persistida localmente."
       scroll={false}
       contentWidth="narrow"
-      headerAlign="center">
+      headerAlign="center"
+      showBackButton
+      onBackPress={() => router.replace('/')}>
       <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.helper, { color: colors.mutedText }]}>
-          Preencha seus dados para acessar o app e comecar a montar sua despensa inteligente.
+          Preencha seus dados para acessar o app e começar a montar sua despensa inteligente.
         </Text>
 
         <View style={styles.form}>
@@ -70,7 +72,7 @@ export default function CadastroScreen() {
         <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
         {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
         <Button title="Cadastrar" onPress={() => void handleRegister()} loading={isSubmitting} />
-        <Button title="Ja tenho conta" onPress={() => router.push('/login')} variant="ghost" />
+        <Button title="Já tenho conta" onPress={() => router.push('/login')} variant="ghost" />
         </View>
       </View>
     </Screen>

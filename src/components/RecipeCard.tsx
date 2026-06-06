@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { spacing } from '@/theme/spacing';
-import { formatDuration, formatServings } from '@/utils/formatters';
+import { formatDuration, formatMealCategory, formatServings } from '@/utils/formatters';
 import type { Recipe } from '@/types/recipe';
 
 interface RecipeCardProps {
@@ -43,7 +43,7 @@ export function RecipeCard({
       <View style={styles.header}>
         <View style={styles.titleBlock}>
           <Text style={[styles.title, { color: colors.text }]}>{recipe.nome}</Text>
-          <Text style={[styles.category, { color: colors.primary }]}>{recipe.refeicao}</Text>
+          <Text style={[styles.category, { color: colors.primary }]}>{formatMealCategory(recipe.refeicao)}</Text>
         </View>
         {onToggleFavorite ? (
           <Pressable

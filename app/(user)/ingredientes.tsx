@@ -41,13 +41,19 @@ export default function IngredientesScreen() {
   }, [ingredientCatalog]);
 
   const handleToggle = (ingredientId: number) => {
-    setSelectionState((currentState) => ({
-      ...currentState,
-      [ingredientId]: {
-        ...currentState[ingredientId],
-        selected: !currentState[ingredientId].selected,
-      },
-    }));
+    setSelectionState((currentState) => {
+      const currentIngredient = currentState[ingredientId];
+      const nextSelected = !currentIngredient.selected;
+
+      return {
+        ...currentState,
+        [ingredientId]: {
+          ...currentIngredient,
+          selected: nextSelected,
+          quantity: nextSelected ? currentIngredient.quantity : '',
+        },
+      };
+    });
   };
 
   const handleQuantityChange = (ingredientId: number, quantity: string) => {
@@ -70,14 +76,14 @@ export default function IngredientesScreen() {
       }));
 
     if (selectedIngredients.length === 0) {
-      Alert.alert('Selecione ingredientes', 'Escolha pelo menos um ingrediente para o filtro.');
+      Alert.alert('Selecione ingredientes', 'Escolha pelo menos um ingrediente para usar o filtro.');
       return;
     }
 
     if (selectedIngredients.some((ingredient) => !validatePositiveNumber(ingredient.quantity))) {
       Alert.alert(
-        'Quantidade invalida',
-        'Informe quantidades numericas maiores que zero para todos os ingredientes selecionados.'
+        'Quantidade inválida',
+        'Informe quantidades numéricas maiores que zero para todos os ingredientes selecionados.'
       );
       return;
     }
@@ -94,10 +100,10 @@ export default function IngredientesScreen() {
   return (
     <Screen
       title="Minha despensa"
-      subtitle="Selecione os ingredientes que voce tem e informe a quantidade disponivel para cada um deles.">
+      subtitle="Selecione os ingredientes que você tem e informe a quantidade disponível para cada um deles.">
       <SectionTitle
-        title="Ingredientes disponiveis"
-        subtitle="A receita so aparece nos resultados se todos os ingredientes estiverem presentes e com quantidade suficiente."
+        title="Ingredientes disponíveis"
+        subtitle="A receita só aparece nos resultados se todos os ingredientes estiverem presentes e com quantidade suficiente."
       />
       <View style={styles.list}>
         {ingredientCatalog.map((ingredient) => (
@@ -112,7 +118,7 @@ export default function IngredientesScreen() {
           />
         ))}
       </View>
-      <Button title="Encontrar receitas possiveis" onPress={() => void handleSearch()} loading={isSubmitting} />
+      <Button title="Encontrar receitas possíveis" onPress={() => void handleSearch()} loading={isSubmitting} />
     </Screen>
   );
 }

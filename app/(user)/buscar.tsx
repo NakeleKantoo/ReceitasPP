@@ -10,6 +10,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
+import { formatMealCategory } from '@/utils/formatters';
 
 export default function BuscarScreen() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function BuscarScreen() {
   return (
     <Screen
       title="Buscar receitas"
-      subtitle="Pesquise por nome e refine o catalogo por categoria antes de abrir os detalhes.">
+      subtitle="Pesquise por nome e filtre o catálogo por categoria antes de abrir os detalhes.">
       <Input
         label="Pesquisar por nome"
         value={query}
@@ -57,7 +58,7 @@ export default function BuscarScreen() {
               },
             ]}>
             <Text style={{ color: selectedCategory === category ? '#fff' : colors.text, fontWeight: '600' }}>
-              {category}
+              {formatMealCategory(category)}
             </Text>
           </Pressable>
         ))}

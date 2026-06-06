@@ -9,7 +9,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
-import { formatDuration, formatServings, formatUnit } from '@/utils/formatters';
+import { formatDuration, formatMealCategory, formatServings, formatUnit } from '@/utils/formatters';
 import { useEffect, useState } from 'react';
 import type { Recipe } from '@/types/recipe';
 
@@ -39,19 +39,19 @@ export default function ReceitaDetalheScreen() {
 
   if (!recipe) {
     return (
-      <Screen title="Receita nao encontrada">
+      <Screen title="Receita não encontrada" showBackButton>
         <EmptyState
-          title="Receita indisponivel"
-          description="Nao foi possivel localizar a receita nos dados atuais."
+          title="Receita indisponível"
+          description="Não foi possível localizar a receita nos dados atuais."
         />
       </Screen>
     );
   }
 
   return (
-    <Screen title={recipe.nome}>
+    <Screen title={recipe.nome} showBackButton>
       <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.meta, { color: colors.primary }]}>{recipe.refeicao}</Text>
+        <Text style={[styles.meta, { color: colors.primary }]}>{formatMealCategory(recipe.refeicao)}</Text>
         <Text style={[styles.meta, { color: colors.text }]}>{formatDuration(recipe.tempoPreparo)}</Text>
         <Text style={[styles.meta, { color: colors.text }]}>{formatServings(recipe.porcoes)}</Text>
       </View>
@@ -73,8 +73,7 @@ export default function ReceitaDetalheScreen() {
             <View key={`${recipe.id}-${ingredient.id}`} style={styles.ingredientRow}>
               <Text style={[styles.bullet, { color: colors.primary }]}>-</Text>
               <Text style={[styles.item, { color: colors.text }]}>
-                {ingredientName}: {ingredient.quantidade}
-                {formatUnit(ingredient.ingrediente?.unidade)}
+                {ingredientName}: {ingredient.quantidade} {formatUnit(ingredient.ingrediente?.unidade)}
               </Text>
             </View>
           );

@@ -1,4 +1,6 @@
-import { ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppTheme } from '@/hooks/useAppTheme';
@@ -13,6 +15,9 @@ interface ScreenProps {
   contentStyle?: StyleProp<ViewStyle>;
   contentWidth?: 'default' | 'narrow';
   headerAlign?: 'start' | 'center';
+  showBackButton?: boolean;
+  backLabel?: string;
+  onBackPress?: () => void;
 }
 
 export function Screen({
@@ -23,10 +28,15 @@ export function Screen({
   contentStyle,
   contentWidth = 'default',
   headerAlign = 'start',
+  showBackButton = false,
+  backLabel = 'Voltar',
+  onBackPress,
 }: ScreenProps) {
   const { colors } = useAppTheme();
+  const router = useRouter();
   const Container = scroll ? ScrollView : View;
   const isCenteredHeader = headerAlign === 'center';
+  const handleBackPress = onBackPress ?? (() => router.back());
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
@@ -37,6 +47,14 @@ export function Screen({
           !scroll && styles.nonScrollContent,
           contentStyle,
         ]}>
+        {showBackButton ? (
+          <View style={[contentWidth === 'narrow' && styles.narrowContent]}>
+            <Pressable onPress={handleBackPress} style={styles.backButton}>
+              <FontAwesome color={colors.text} name="arrow-left" size={14} />
+              <Text style={[styles.backLabel, { color: colors.text }]}>{backLabel}</Text>
+            </Pressable>
+          </View>
+        ) : null}
         {title ? (
           <View
             style={[
@@ -76,6 +94,16 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: spacing.xs,
+  },
+  backButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  backLabel: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   headerCentered: {
     alignItems: 'center',

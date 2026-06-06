@@ -27,13 +27,14 @@ export default function MinhasReceitasScreen() {
   return (
     <Screen
       title="Minhas receitas"
-      subtitle="Acompanhe aqui as receitas criadas por voce e o status atual de moderacao de cada uma.">
-      <Button title="Cadastrar nova receita" onPress={() => router.push('/(user)/nova-receita')} />
+      subtitle="Acompanhe as receitas criadas por você e o status atual de moderação de cada uma."
+      showBackButton>
+      <Button title="Adicionar nova receita" onPress={() => router.push('/(user)/nova-receita')} />
       <View style={styles.list}>
         {myRecipes.length === 0 ? (
           <EmptyState
-            title="Nenhuma receita vinculada"
-            description="Voce ainda nao cadastrou receitas. Use o botao acima para enviar sua primeira receita."
+            title="Nenhuma receita cadastrada"
+            description="Você ainda não cadastrou receitas. Use o botão acima para enviar a sua primeira."
           />
         ) : (
           myRecipes.map((recipe) => (

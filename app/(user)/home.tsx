@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { Button } from '@/components/Button';
+import { EmptyState } from '@/components/EmptyState';
 import { RecipeCard } from '@/components/RecipeCard';
 import { Screen } from '@/components/Screen';
 import { SectionTitle } from '@/components/SectionTitle';
@@ -18,96 +20,126 @@ export default function HomeScreen() {
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const featuredRecipes = approvedRecipes.slice(0, 3);
-  const myRecipesCount = user ? getUserRecipes(user.id).length : 0;
+  const myRecipes = user ? getUserRecipes(user.id) : [];
+  const pendingRecipesCount = myRecipes.filter((recipe) => recipe.status === 'pending').length;
+  const approvedRecipesCount = myRecipes.filter((recipe) => recipe.status === 'approved').length;
+  const latestMyRecipes = myRecipes.slice(0, 2);
 
   return (
     <Screen
-      title={`Ola, ${user?.username?.split(' ')[0] ?? 'chef'}!`}
-      subtitle="Escolha uma forma rapida de encontrar receitas que funcionem com a sua despensa.">
+      title={`Olá, ${user?.username?.split(' ')[0] ?? 'chef'}!`}
+      subtitle="Compartilhe suas receitas e acompanhe com clareza o que já foi aprovado ou ainda está em moderação.">
       <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.bannerTitle, { color: colors.text }]}>Seu atalho na cozinha</Text>
+        <Text style={[styles.bannerTitle, { color: colors.text }]}>Publique sua próxima receita</Text>
         <Text style={[styles.bannerText, { color: colors.mutedText }]}>
-          Busque por nome, explore o catalogo ou use o filtro inteligente por ingredientes e quantidades.
+          Cadastre uma receita com ingredientes, porções e modo de preparo. Depois, acompanhe o status da moderação sem sair do app.
         </Text>
-      </View>
-
-      <SectionTitle title="Acesso rapido" />
-      <View style={styles.quickList}>
-        <QuickAction
-          title="Buscar receitas"
-          description="Pesquise receitas aprovadas por nome e categoria."
-          onPress={() => router.push('/(user)/buscar')}
-        />
-        <QuickAction
-          title="Informar ingredientes"
-          description="Descubra o que voce consegue preparar agora."
-          onPress={() => router.push('/(user)/ingredientes')}
-        />
-        <QuickAction
-          title="Favoritos"
-          description="Acesse suas receitas salvas."
-          onPress={() => router.push('/(user)/favoritos')}
-        />
-        <QuickAction
-          title="Minhas receitas"
-          description={`${myRecipesCount} receita(s) vinculada(s) ao seu usuario.`}
-          onPress={() => router.push('/(user)/minhas-receitas')}
-        />
-        <QuickAction
-          title="Nova receita"
-          description="Envie uma receita propria para moderacao do Superadmin."
-          onPress={() => router.push('/(user)/nova-receita')}
-        />
-      </View>
-
-      <SectionTitle title="Receitas novas" />
-      <View style={styles.list}>
-        {featuredRecipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            isFavorite={isFavorite(recipe.id)}
-            onToggleFavorite={() => {
-              void toggleFavorite(recipe.id);
-            }}
-            onPress={() =>
-              router.push({
-                pathname: '/(user)/receita/[id]',
-                params: { id: recipe.id },
-              })
-            }
+        <View style={styles.bannerActions}>
+          <Button title="Adicionar nova receita" onPress={() => router.push('/(user)/nova-receita')} />
+          <Button
+            title="Acompanhar minhas receitas"
+            onPress={() => router.push('/(user)/minhas-receitas')}
+            variant="ghost"
           />
-        ))}
+        </View>
+      </View>
+
+      <View style={styles.summaryRow}>
+        <SummaryCard
+          title="Receitas enviadas"
+          description={`${myRecipes.length} receita(s) cadastrada(s) na sua conta.`}
+        />
+        <SummaryCard
+          title="Em moderação"
+          description={`${pendingRecipesCount} aguardando análise do Superadmin.`}
+        />
+        <SummaryCard
+          title="Já aprovadas"
+          description={`${approvedRecipesCount} pronta(s) para aparecer nas buscas.`}
+        />
+      </View>
+
+      <SectionTitle
+        title="Suas receitas mais recentes"
+        subtitle="Acesse rapidamente o que você enviou por último e acompanhe o status de cada envio."
+      />
+      <View style={styles.list}>
+        {latestMyRecipes.length === 0 ? (
+          <EmptyState
+            title="Sua cozinha ainda está vazia"
+            description="Toque em “Adicionar nova receita” para começar a montar o seu catálogo."
+          />
+        ) : (
+          latestMyRecipes.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              statusLabel
+              onPress={() =>
+                router.push({
+                  pathname: '/(user)/receita/[id]',
+                  params: { id: recipe.id },
+                })
+              }
+            />
+          ))
+        )}
+      </View>
+
+      <SectionTitle
+        title="Receitas em destaque"
+        subtitle="Quando quiser explorar o catálogo ou usar o filtro por ingredientes, a barra inferior continua disponível."
+      />
+      <View style={styles.list}>
+        {featuredRecipes.length === 0 ? (
+          <EmptyState
+            title="Nenhuma receita em destaque"
+            description="Assim que houver receitas aprovadas, elas aparecerão aqui para facilitar a exploração."
+          />
+        ) : (
+          featuredRecipes.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              isFavorite={isFavorite(recipe.id)}
+              onToggleFavorite={() => {
+                void toggleFavorite(recipe.id);
+              }}
+              onPress={() =>
+                router.push({
+                  pathname: '/(user)/receita/[id]',
+                  params: { id: recipe.id },
+                })
+              }
+            />
+          ))
+        )}
       </View>
     </Screen>
   );
 }
 
-function QuickAction({
+function SummaryCard({
   title,
   description,
-  onPress,
 }: {
   title: string;
   description: string;
-  onPress: () => void;
 }) {
   const { colors } = useAppTheme();
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.quickCard,
+    <View
+      style={[
+        styles.summaryCard,
         {
           backgroundColor: colors.card,
           borderColor: colors.border,
-          opacity: pressed ? 0.85 : 1,
         },
       ]}>
-      <Text style={[styles.quickTitle, { color: colors.text }]}>{title}</Text>
-      <Text style={[styles.quickDescription, { color: colors.mutedText }]}>{description}</Text>
-    </Pressable>
+      <Text style={[styles.summaryTitle, { color: colors.text }]}>{title}</Text>
+      <Text style={[styles.summaryDescription, { color: colors.mutedText }]}>{description}</Text>
+    </View>
   );
 }
 
@@ -118,6 +150,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.xxl,
   },
+  bannerActions: {
+    gap: spacing.md,
+    marginTop: spacing.md,
+  },
   bannerTitle: {
     fontSize: 20,
     fontWeight: '800',
@@ -126,20 +162,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
-  quickList: {
+  summaryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
   },
-  quickCard: {
+  summaryCard: {
     borderRadius: 22,
     borderWidth: 1,
+    flex: 1,
     gap: spacing.sm,
+    minWidth: 160,
     padding: spacing.xl,
   },
-  quickTitle: {
+  summaryTitle: {
     fontSize: 16,
     fontWeight: '700',
   },
-  quickDescription: {
+  summaryDescription: {
     fontSize: 14,
     lineHeight: 20,
   },

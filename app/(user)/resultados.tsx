@@ -15,17 +15,18 @@ export default function ResultadosScreen() {
 
   return (
     <Screen
-      title="Receitas compativeis"
-      subtitle="Aqui aparecem apenas as receitas aprovadas que combinam com todos os ingredientes e quantidades informados.">
+      title="Receitas compatíveis"
+      subtitle="Aqui aparecem apenas as receitas aprovadas que combinam com todos os ingredientes e quantidades informados."
+      showBackButton>
       {latestAvailableIngredients.length === 0 ? (
         <EmptyState
           title="Nenhuma busca realizada"
-          description="Volte para a tela de ingredientes, monte sua despensa e rode o filtro inteligente."
+          description="Volte para a tela de ingredientes, monte sua despensa e use o filtro inteligente."
         />
       ) : compatibleRecipes.length === 0 ? (
         <EmptyState
-          title="Nenhuma receita possivel"
-          description="Com as quantidades informadas, nenhuma receita aprovada ficou totalmente compativel."
+          title="Nenhuma receita possível"
+          description="Com as quantidades informadas, nenhuma receita aprovada ficou totalmente compatível."
         />
       ) : (
         <View style={styles.list}>

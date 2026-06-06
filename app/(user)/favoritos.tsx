@@ -18,12 +18,12 @@ export default function FavoritosScreen() {
   return (
     <Screen
       title="Favoritos"
-      subtitle="Receitas marcadas por voce ficam vinculadas ao usuario logado e persistidas localmente.">
+      subtitle="Receitas marcadas por você ficam vinculadas ao usuário logado e persistidas localmente.">
       <View style={styles.list}>
         {favoriteRecipes.length === 0 ? (
           <EmptyState
             title="Nenhum favorito salvo"
-            description="Abra uma receita e toque na estrela para guardar suas favoritas."
+            description="Abra uma receita e toque na estrela para guardar as suas favoritas."
           />
         ) : (
           favoriteRecipes.map((recipe) => (
