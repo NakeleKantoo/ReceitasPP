@@ -126,8 +126,8 @@ export default function NovaReceitaScreen() {
       });
 
       Alert.alert(
-        'Receita enviada',
-        'Sua receita foi cadastrada com status pendente e já está disponível para moderação do Superadmin.'
+        'Receita cadastrada',
+        'Receita cadastrada com sucesso. Agora ela esta aguardando moderacao do Superadmin.'
       );
       resetForm();
       router.replace('/(user)/minhas-receitas');

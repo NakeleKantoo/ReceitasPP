@@ -1,77 +1,67 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Redirect, useRouter } from 'expo-router';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { Screen } from '@/components/Screen';
-import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useAppTheme';
+import { resetPassword } from '@/services/authService';
 import { spacing } from '@/theme/spacing';
-import { validateEmail } from '@/utils/validators';
 
-export default function CadastroScreen() {
+export default function EsqueciSenhaScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
-  const { user, register } = useAuth();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRegister = async () => {
-    if (!name.trim()) {
-      setError('Informe seu nome.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError('Informe um e-mail valido.');
-      return;
-    }
-
-    if (!password.trim()) {
-      setError('Informe uma senha.');
+  const handleResetPassword = async () => {
+    if (password !== confirmPassword) {
+      setError('A confirmacao da senha precisa ser igual a nova senha.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       setError('');
-      await register(name, email, password);
-      router.replace('/(user)/home');
-    } catch (registerError) {
-      setError(registerError instanceof Error ? registerError.message : 'Nao foi possivel cadastrar.');
+      await resetPassword(email, password);
+      Alert.alert('Senha redefinida', 'Sua senha foi atualizada com sucesso. Faca login com a nova senha.');
+      router.replace('/login');
+    } catch (resetError) {
+      setError(resetError instanceof Error ? resetError.message : 'Nao foi possivel redefinir a senha.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (user) {
-    return <Redirect href={user.account_type === 'superadmin' ? '/(admin)/dashboard' : '/(user)/home'} />;
-  }
-
   return (
     <Screen
-      title="Criar conta"
-      subtitle="O cadastro cria um novo usuario comum e ja abre a area interna com sessao persistida localmente."
+      title="Redefinir senha"
+      subtitle="Para esta demonstracao, informe o e-mail cadastrado e defina uma nova senha para a sua conta."
       scroll={false}
       contentWidth="narrow"
       headerAlign="center"
       showBackButton>
       <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.helper, { color: colors.mutedText }]}>
-          Preencha seus dados para acessar o app e comecar a montar sua despensa inteligente.
+          A nova senha substitui a anterior imediatamente e ja pode ser usada no proximo login.
         </Text>
 
         <View style={styles.form}>
-          <Input label="Nome" value={name} onChangeText={setName} />
           <Input label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" />
-          <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
+          <Input label="Nova senha" value={password} onChangeText={setPassword} secureTextEntry />
+          <Input
+            label="Confirmar nova senha"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
           {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
-          <Button title="Cadastrar" onPress={() => void handleRegister()} loading={isSubmitting} />
-          <Button title="Ja tenho conta" onPress={() => router.push('/login')} variant="ghost" />
+          <Button title="Redefinir senha" onPress={() => void handleResetPassword()} loading={isSubmitting} />
+          <Button title="Voltar para o login" onPress={() => router.replace('/login')} variant="ghost" />
         </View>
       </View>
     </Screen>

@@ -410,6 +410,33 @@ app.post("/register", async (req, res) => {
   }
 });
 
+async function handleResetPassword(req, res) {
+  const email = String(req.body.email ?? "").trim().toLowerCase();
+  const password = String(req.body.password ?? "");
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Informe e-mail e nova senha." });
+  }
+
+  try {
+    const user = await usuarioRepo.findOneBy({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "Nenhuma conta foi encontrada com este e-mail." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await usuarioRepo.update({ id: user.id }, { password: hashedPassword });
+
+    return res.status(200).json({ message: "Senha redefinida com sucesso." });
+  } catch (error) {
+    return res.status(500).json({ message: "Nao foi possivel redefinir a senha." });
+  }
+}
+
+app.post("/auth/reset-password", handleResetPassword);
+app.post("/reset-password", handleResetPassword);
+
 app.get("/auth/me", checkAuth, async (req, res) => {
   const user = await usuarioRepo.findOneBy({ id: req.user.id });
 

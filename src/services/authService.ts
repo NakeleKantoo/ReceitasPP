@@ -7,7 +7,7 @@ import {
   initializeStorage,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
-import { fetchCurrentUser, loginOnline, registerOnline } from '@/utils/endpoints';
+import { fetchCurrentUser, loginOnline, registerOnline, resetPasswordOnline } from '@/utils/endpoints';
 
 export async function getUser() {
   await initializeStorage();
@@ -71,6 +71,20 @@ export async function register(name: string, email: string, password: string) {
   }
 
   return res;
+}
+
+export async function resetPassword(email: string, password: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!validateEmail(normalizedEmail)) {
+    throw new Error('Informe um e-mail valido.');
+  }
+
+  if (!password.trim()) {
+    throw new Error('Informe uma nova senha.');
+  }
+
+  return await resetPasswordOnline(normalizedEmail, password);
 }
 
 export async function logout() {

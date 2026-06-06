@@ -6,7 +6,7 @@ import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { useAppTheme } from '@/hooks/useAppTheme';
-import { getAllAdminRecipes, moderateRecipe, removeRecipeAsAdmin } from '@/services/adminService';
+import { getAllAdminRecipes, moderateRecipe } from '@/services/adminService';
 import { spacing } from '@/theme/spacing';
 import type { Recipe } from '@/types/recipe';
 import { formatDate } from '@/utils/formatters';
@@ -40,31 +40,23 @@ export default function AprovacoesScreen() {
       await moderateRecipe(recipeId, nextStatus);
       Alert.alert(
         nextStatus === 'approved' ? 'Receita aprovada' : 'Receita rejeitada',
-        'A alteracao foi salva no backend.'
+        nextStatus === 'approved'
+          ? 'Receita aprovada com sucesso.'
+          : 'Receita rejeitada com sucesso.'
       );
       await loadPendingRecipes();
     } catch (moderationError) {
-      Alert.alert('Erro', moderationError instanceof Error ? moderationError.message : 'Nao foi possivel moderar.');
-    }
-  };
-
-  const handleDelete = async (recipeId: number) => {
-    try {
-      await removeRecipeAsAdmin(recipeId);
-      Alert.alert('Receita removida', 'A receita foi removida da base.');
-      await loadPendingRecipes();
-    } catch (deleteError) {
-      Alert.alert('Erro', deleteError instanceof Error ? deleteError.message : 'Nao foi possivel remover.');
+      Alert.alert('Erro', moderationError instanceof Error ? moderationError.message : 'Nao foi possivel moderar a receita.');
     }
   };
 
   return (
     <Screen
       title="Receitas pendentes"
-      subtitle="Fila administrativa real para aprovar, rejeitar ou remover receitas submetidas.">
+      subtitle="Fila administrativa para aprovar ou rejeitar receitas submetidas.">
       <View style={styles.list}>
         {isLoading ? (
-          <EmptyState title="Carregando pendencias" description="Consultando receitas pendentes no backend." />
+          <EmptyState title="Carregando pendencias" description="Consultando receitas pendentes no sistema." />
         ) : error ? (
           <EmptyState title="Falha ao carregar pendencias" description={error} />
         ) : pendingRecipes.length === 0 ? (
@@ -89,12 +81,6 @@ export default function AprovacoesScreen() {
                   title="Rejeitar"
                   onPress={() => void handleModeration(recipe.id, 'rejected')}
                   variant="ghost"
-                  fullWidth={false}
-                />
-                <Button
-                  title="Remover"
-                  onPress={() => void handleDelete(recipe.id)}
-                  variant="danger"
                   fullWidth={false}
                 />
               </View>

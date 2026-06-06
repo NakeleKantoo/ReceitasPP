@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Redirect, useRouter } from 'expo-router';
 
 import { Button } from '@/components/Button';
@@ -13,8 +13,8 @@ export default function LoginScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { user, login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,23 +38,25 @@ export default function LoginScreen() {
   return (
     <Screen
       title="Entrar"
-      subtitle="Use uma conta comum para o fluxo principal do app ou uma conta Superadmin para a área administrativa."
+      subtitle="Use uma conta comum para o fluxo principal do app ou uma conta Superadmin para a area administrativa."
       scroll={false}
       contentWidth="narrow"
       headerAlign="center"
-      showBackButton
-      onBackPress={() => router.replace('/')}>
+      showBackButton>
       <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.helper, { color: colors.mutedText }]}>
           Informe suas credenciais para acessar suas receitas ou o painel administrativo.
         </Text>
 
         <View style={styles.form}>
-        <Input label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" />
-        <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
-        {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
-        <Button title="Entrar" onPress={() => void handleLogin()} loading={isSubmitting} />
-        <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
+          <Input label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" />
+          <Input label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
+          <Pressable onPress={() => router.push('/esqueci-senha')}>
+            <Text style={[styles.link, { color: colors.primary }]}>Esqueceu a senha?</Text>
+          </Pressable>
+          {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
+          <Button title="Entrar" onPress={() => void handleLogin()} loading={isSubmitting} />
+          <Button title="Criar conta" onPress={() => router.push('/cadastro')} variant="ghost" />
         </View>
       </View>
     </Screen>
@@ -76,6 +78,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
+  },
+  link: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'right',
   },
   error: {
     fontSize: 13,

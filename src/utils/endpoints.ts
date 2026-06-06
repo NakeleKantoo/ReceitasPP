@@ -34,15 +34,26 @@ async function buildHeaders(withAuth = false) {
 
 async function parseResponse<T>(response: Response) {
   if (!response.ok) {
-    let message = 'Nao foi possivel concluir a requisicao.';
+    let message = `Erro ${response.status} ao concluir a requisicao.`;
+    const responsePath = response.url ? new URL(response.url).pathname : '';
 
     try {
-      const errorBody = (await response.json()) as { message?: string };
-      if (errorBody.message) {
-        message = errorBody.message;
+      const rawBody = await response.text();
+
+      if (rawBody) {
+        const errorBody = JSON.parse(rawBody) as { message?: string };
+
+        if (errorBody.message) {
+          message = errorBody.message;
+        }
       }
     } catch {
-      // Mantem a mensagem padrao quando o backend nao retorna JSON valido.
+      if (response.status === 404 && responsePath.includes('reset-password')) {
+        message =
+          'O backend ativo nao reconheceu a rota de redefinicao de senha. Reinicie o backend para carregar a rota /auth/reset-password.';
+      } else if (response.status >= 500) {
+        message = 'O backend encontrou um erro ao processar a requisicao.';
+      }
     }
 
     throw new Error(message);
@@ -96,6 +107,13 @@ export async function loginOnline(email: string, password: string) {
   });
   await persistAuthPayload(payload);
   return payload.usuario;
+}
+
+export async function resetPasswordOnline(email: string, password: string) {
+  return await requestJson<{ message: string }>('auth/reset-password', {
+    method: 'POST',
+    body: { email, password },
+  });
 }
 
 export async function fetchCurrentUser() {
