@@ -27,7 +27,11 @@ export default function ReceitaDetalheScreen() {
         return;
       }
 
-      setRecipe(await getRecipeById(Number(id)));
+      try {
+        setRecipe(await getRecipeById(Number(id)));
+      } catch {
+        setRecipe(null);
+      }
     }
 
     void populate();

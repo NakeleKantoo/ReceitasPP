@@ -1,6 +1,9 @@
+import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
+import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { RecipeCard } from '@/components/RecipeCard';
 import { Screen } from '@/components/Screen';
@@ -11,19 +14,26 @@ import { spacing } from '@/theme/spacing';
 export default function MinhasReceitasScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { getUserRecipes } = useRecipes();
+  const { getUserRecipes, refreshRecipes } = useRecipes();
 
   const myRecipes = user ? getUserRecipes(user.id) : [];
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshRecipes();
+    }, [refreshRecipes])
+  );
 
   return (
     <Screen
       title="Minhas receitas"
-      subtitle="Receitas ja vinculadas ao seu usuario mockado, incluindo pendentes e rejeitadas.">
+      subtitle="Acompanhe aqui as receitas criadas por voce e o status atual de moderacao de cada uma.">
+      <Button title="Cadastrar nova receita" onPress={() => router.push('/(user)/nova-receita')} />
       <View style={styles.list}>
         {myRecipes.length === 0 ? (
           <EmptyState
             title="Nenhuma receita vinculada"
-            description="Seu usuario ainda nao possui receitas mockadas nesta base."
+            description="Voce ainda nao cadastrou receitas. Use o botao acima para enviar sua primeira receita."
           />
         ) : (
           myRecipes.map((recipe) => (

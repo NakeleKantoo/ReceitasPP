@@ -29,6 +29,16 @@ export interface NewRecipeInput {
   porcoes: number;
   ingredientes: RecipeIngredient[];
   passos: string;
-  autor: string;
-  createdAt: string;
+}
+
+export interface CreateRecipePayload {
+  nome: string;
+  refeicao: string;
+  tempoPreparo: number;
+  porcoes: number;
+  passos: string;
+  ingredientes: Array<{
+    ingredienteId: number;
+    quantidade: number;
+  }>;
 }

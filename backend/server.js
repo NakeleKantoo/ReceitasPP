@@ -51,6 +51,22 @@ function sanitizeUser(user) {
   };
 }
 
+function canUserAccessRecipe(user, recipe) {
+  if (!user || !recipe) {
+    return false;
+  }
+
+  if (user.account_type === "superadmin") {
+    return true;
+  }
+
+  if (recipe.autor?.id === user.id) {
+    return true;
+  }
+
+  return recipe.status === "approved";
+}
+
 function sortEntries(entries) {
   return Object.entries(entries)
     .sort((first, second) => second[1] - first[1])
@@ -394,7 +410,17 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.get("/receitas", checkAuth, async (_req, res) => {
+app.get("/auth/me", checkAuth, async (req, res) => {
+  const user = await usuarioRepo.findOneBy({ id: req.user.id });
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuario nao encontrado." });
+  }
+
+  return res.status(200).json(sanitizeUser(user));
+});
+
+app.get("/receitas", checkAuth, async (req, res) => {
   const recipes = await receitaRepo.find({
     order: { createdAt: "DESC" },
     relations: {
@@ -405,7 +431,11 @@ app.get("/receitas", checkAuth, async (_req, res) => {
     },
   });
 
-  return res.status(200).json(recipes);
+  const visibleRecipes = req.user.account_type === "superadmin"
+    ? recipes
+    : recipes.filter((recipe) => canUserAccessRecipe(req.user, recipe));
+
+  return res.status(200).json(visibleRecipes);
 });
 
 app.get("/receitas/:id", checkAuth, async (req, res) => {
@@ -413,6 +443,10 @@ app.get("/receitas/:id", checkAuth, async (req, res) => {
 
   if (!recipe) {
     return res.status(404).json({ message: "Receita nao encontrada." });
+  }
+
+  if (!canUserAccessRecipe(req.user, recipe)) {
+    return res.status(403).json({ message: "Voce nao tem acesso a esta receita." });
   }
 
   return res.status(200).json(recipe);

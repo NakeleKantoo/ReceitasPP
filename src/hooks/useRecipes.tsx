@@ -11,7 +11,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { getCompatibleRecipes, getRecipeMissingRequirements } from '@/utils/recipeCompatibility';
 import type { AvailableIngredient, Ingredient } from '@/types/ingredient';
-import type { Recipe } from '@/types/recipe';
+import type { CreateRecipePayload, Recipe } from '@/types/recipe';
 
 import * as recipeService from '@/services/recipeService';
 
@@ -27,6 +27,7 @@ interface RecipesContextValue {
   isLoading: boolean;
   refreshRecipes: () => Promise<void>;
   getRecipeById: (recipeId: number | string) => Promise<Recipe>;
+  createRecipe: (payload: CreateRecipePayload) => Promise<Recipe>;
   getUserRecipes: (userId: number) => Recipe[];
   runCompatibilityCheck: (ingredients: AvailableIngredient[]) => Recipe[];
   clearCompatibilityResults: () => void;
@@ -88,6 +89,11 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
       isLoading,
       refreshRecipes,
       getRecipeById: recipeService.getRecipeById,
+      createRecipe: async (payload) => {
+        const createdRecipe = await recipeService.createRecipe(payload);
+        await refreshRecipes();
+        return createdRecipe;
+      },
       getUserRecipes: (userId) => getRecipesForUser(allRecipes, userId),
       runCompatibilityCheck: (ingredients) => {
         const results = getCompatibleRecipes(approvedRecipes, ingredients, ingredientCatalog);
