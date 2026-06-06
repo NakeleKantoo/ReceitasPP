@@ -1,7 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { mockFavorites } from '@/data/mockFavorites';
-import { mockSearchLogs } from '@/data/mockSearchLogs';
 import type { Favorite, SearchLog } from '@/types/favorite';
 import type { Session, User } from '@/types/user';
 
@@ -33,8 +31,8 @@ async function seedCollection<T>(key: string, initialValue: T) {
 }
 
 export async function initializeStorage() {
-  await seedCollection(storageKeys.favorites, mockFavorites);
-  await seedCollection(storageKeys.searchLogs, mockSearchLogs);
+  await seedCollection(storageKeys.favorites, []);
+  await seedCollection(storageKeys.searchLogs, []);
 }
 
 export function getStoredUser() {
@@ -63,6 +61,10 @@ export function saveStoredSession(session: Session) {
 
 export function clearStoredSession() {
   return AsyncStorage.removeItem(storageKeys.session);
+}
+
+export function clearStoredUser() {
+  return AsyncStorage.removeItem(storageKeys.user);
 }
 
 export function getStoredSearchLogs() {

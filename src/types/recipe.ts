@@ -1,4 +1,7 @@
-import type { Ingredient, IngredientUnit } from '@/types/ingredient';
+import type { Ingredient } from '@/types/ingredient';
+import type { UserSummary } from '@/types/user';
+
+export type RecipeStatus = 'pending' | 'approved' | 'rejected';
 
 export interface RecipeIngredient {
   id: number;
@@ -7,14 +10,15 @@ export interface RecipeIngredient {
 }
 
 export interface Recipe {
-  id: string;
+  id: number;
   nome: string;
   refeicao: string;
   tempoPreparo: number;
   porcoes: number;
   ingredientes: RecipeIngredient[];
   passos: string;
-  autor: string;
+  autor: UserSummary | null;
+  status: RecipeStatus;
   createdAt: string;
 }
 

@@ -1,86 +1,160 @@
-import { getStoredSession, saveStoredSession, saveStoredUser } from "@/services/storageService";
-import { Recipe } from "@/types/recipe";
-import { User } from "@/types/user";
-import { RECEITAS_API } from "@/utils/api";
+import { getStoredSession, saveStoredSession, saveStoredUser } from '@/services/storageService';
+import type { AdminDashboardStats, AdminReports } from '@/types/admin';
+import type { Ingredient } from '@/types/ingredient';
+import type { Recipe, RecipeStatus } from '@/types/recipe';
+import type { User } from '@/types/user';
+import { RECEITAS_API } from '@/utils/api';
+
+interface AuthApiResponse {
+  token: string;
+  usuario: User;
+}
+
+async function buildHeaders(withAuth = false) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (withAuth) {
+    const session = await getStoredSession();
+
+    if (session?.token) {
+      headers.Authorization = `Bearer ${session.token}`;
+    }
+  }
+
+  return headers;
+}
+
+async function parseResponse<T>(response: Response) {
+  if (!response.ok) {
+    let message = 'Nao foi possivel concluir a requisicao.';
+
+    try {
+      const errorBody = (await response.json()) as { message?: string };
+      if (errorBody.message) {
+        message = errorBody.message;
+      }
+    } catch {
+      // Mantem a mensagem padrao quando o backend nao retorna JSON valido.
+    }
+
+    throw new Error(message);
+  }
+
+  return (await response.json()) as T;
+}
+
+async function persistAuthPayload(payload: AuthApiResponse) {
+  await Promise.all([
+    saveStoredSession({ token: payload.token }),
+    saveStoredUser(payload.usuario),
+  ]);
+}
 
 export async function registerOnline(username: string, email: string, password: string) {
-    const endpoint = RECEITAS_API.base_url + 'register';
-    console.log("Executando requisição para: ", endpoint);
+  const response = await fetch(`${RECEITAS_API.base_url}register`, {
+    method: 'POST',
+    headers: await buildHeaders(),
+    body: JSON.stringify({ username, email, password }),
+  });
 
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password })
-    });
-
-    if (res.ok) {
-        const obj = await res.json();
-        saveStoredSession({ userId: 'Bearer ' + obj.token });
-        saveStoredUser(obj.usuario as User);
-        return obj.usuario as User;
-    }
-    return null;
+  const payload = await parseResponse<AuthApiResponse>(response);
+  await persistAuthPayload(payload);
+  return payload.usuario;
 }
 
 export async function loginOnline(email: string, password: string) {
-    const endpoint = RECEITAS_API.base_url + 'login';
-    console.log("Executando requisição para: ", endpoint);
+  const response = await fetch(`${RECEITAS_API.base_url}login`, {
+    method: 'POST',
+    headers: await buildHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
 
-    const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-    });
-
-    if (res.ok) {
-        const obj = await res.json();
-        saveStoredSession({ userId: 'Bearer ' + obj.token });
-        saveStoredUser(obj.usuario as User);
-        return obj.usuario as User;
-    }
-    return null;
+  const payload = await parseResponse<AuthApiResponse>(response);
+  await persistAuthPayload(payload);
+  return payload.usuario;
 }
 
 export async function fetchReceitas() {
-    const endpoint = RECEITAS_API.base_url + 'receitas';
-    console.log("Executando requisição para: ", endpoint);
+  const response = await fetch(`${RECEITAS_API.base_url}receitas`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
 
-    const res = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer' + (await getStoredSession())?.userId
-        },
-    });
-
-    if (res.ok) {
-        const obj = await res.json();
-        
-        
-        return obj as Recipe[];
-    }
-    return null;
+  return parseResponse<Recipe[]>(response);
 }
 
-export async function fetchReceitaById(id: string) {
-    const endpoint = RECEITAS_API.base_url + 'receitas/' + id;
-    console.log("Executando requisição para: ", endpoint);
+export async function fetchReceitaById(id: number | string) {
+  const response = await fetch(`${RECEITAS_API.base_url}receitas/${id}`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
 
-    const res = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer' + (await getStoredSession())?.userId
-        },
-    });
+  return parseResponse<Recipe>(response);
+}
 
-    if (res.ok) {
-        const obj = await res.json();
-        return obj as Recipe;
-    }
-    return null;
+export async function fetchIngredientes() {
+  const response = await fetch(`${RECEITAS_API.base_url}ingredientes`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<Ingredient[]>(response);
+}
+
+export async function fetchAdminDashboard() {
+  const response = await fetch(`${RECEITAS_API.base_url}admin/dashboard`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<AdminDashboardStats>(response);
+}
+
+export async function fetchAdminReports() {
+  const response = await fetch(`${RECEITAS_API.base_url}admin/reports`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<AdminReports>(response);
+}
+
+export async function fetchAdminUsers() {
+  const response = await fetch(`${RECEITAS_API.base_url}admin/users`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<User[]>(response);
+}
+
+export async function fetchAdminRecipes(status?: RecipeStatus) {
+  const query = status ? `?status=${status}` : '';
+  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes${query}`, {
+    method: 'GET',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<Recipe[]>(response);
+}
+
+export async function updateAdminRecipeStatus(recipeId: number, status: RecipeStatus) {
+  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes/${recipeId}/status`, {
+    method: 'PATCH',
+    headers: await buildHeaders(true),
+    body: JSON.stringify({ status }),
+  });
+
+  return parseResponse<Recipe>(response);
+}
+
+export async function deleteAdminRecipe(recipeId: number) {
+  const response = await fetch(`${RECEITAS_API.base_url}admin/recipes/${recipeId}`, {
+    method: 'DELETE',
+    headers: await buildHeaders(true),
+  });
+
+  return parseResponse<{ id: number; message: string }>(response);
 }

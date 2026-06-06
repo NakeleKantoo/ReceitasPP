@@ -24,9 +24,7 @@ export default function BuscarScreen() {
 
     return approvedRecipes.filter((recipe) => {
       const matchesQuery =
-        !normalizedQuery ||
-        recipe.nome.toLowerCase().includes(normalizedQuery) ||
-        recipe.description.toLowerCase().includes(normalizedQuery);
+        !normalizedQuery || recipe.nome.toLowerCase().includes(normalizedQuery);
 
       const matchesCategory =
         selectedCategory === 'Todas' || recipe.refeicao === selectedCategory;

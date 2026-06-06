@@ -1,12 +1,10 @@
-import { generateId } from '@/utils/id';
 import { validateEmail } from '@/utils/validators';
 import {
   clearStoredSession,
+  clearStoredUser,
   getStoredSession,
   getStoredUser,
   initializeStorage,
-  saveStoredSession,
-  saveStoredUser,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
 import { loginOnline, registerOnline } from '@/utils/endpoints';
@@ -18,6 +16,14 @@ export async function getUser() {
 }
 
 export async function restoreSessionUser() {
+  await initializeStorage();
+  const session = await getStoredSession();
+
+  if (!session?.token) {
+    await clearStoredUser();
+    return null;
+  }
+
   return await getUser();
 }
 
@@ -58,5 +64,5 @@ export async function register(name: string, email: string, password: string) {
 }
 
 export async function logout() {
-  await clearStoredSession();
+  await Promise.all([clearStoredSession(), clearStoredUser()]);
 }

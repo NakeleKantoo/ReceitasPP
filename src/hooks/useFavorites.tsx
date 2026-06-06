@@ -4,11 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import * as favoriteService from '@/services/favoriteService';
 
 interface FavoritesContextValue {
-  favoriteRecipeIds: string[];
+  favoriteRecipeIds: number[];
   isLoading: boolean;
-  toggleFavorite: (recipeId: string) => Promise<boolean>;
-  removeFavorite: (recipeId: string) => Promise<void>;
-  isFavorite: (recipeId: string) => boolean;
+  toggleFavorite: (recipeId: number) => Promise<boolean>;
+  removeFavorite: (recipeId: number) => Promise<void>;
+  isFavorite: (recipeId: number) => boolean;
   refreshFavorites: () => Promise<void>;
 }
 
@@ -16,7 +16,7 @@ const FavoritesContext = createContext<FavoritesContextValue | undefined>(undefi
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<string[]>([]);
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshFavorites = async () => {

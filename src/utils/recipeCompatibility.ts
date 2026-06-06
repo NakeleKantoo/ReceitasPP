@@ -4,7 +4,7 @@ import type { Recipe } from '@/types/recipe';
 export type MissingRequirementReason = 'missing' | 'insufficient';
 
 export interface MissingRequirement {
-  ingredientId: string;
+  ingredientId: number;
   ingredientName: string;
   reason: MissingRequirementReason;
   requiredQuantity: number;
@@ -12,8 +12,8 @@ export interface MissingRequirement {
   unit: string;
 }
 
-function getIngredientName(catalog: Ingredient[], ingredientId: string) {
-  return catalog.find((ingredient) => ingredient.id === ingredientId)?.nome ?? ingredientId;
+function getIngredientName(catalog: Ingredient[], ingredientId: number) {
+  return catalog.find((ingredient) => ingredient.id === ingredientId)?.nome ?? String(ingredientId);
 }
 
 export function getRecipeMissingRequirements(
@@ -25,29 +25,29 @@ export function getRecipeMissingRequirements(
 
   for (const required of recipe.ingredientes) {
     const available = availableIngredients.find(
-      (ingredient) => ingredient.ingredientId === required.id
+      (ingredient) => ingredient.ingredientId === required.ingrediente.id
     );
 
     if (!available) {
       issues.push({
-        ingredientId: required.id,
-        ingredientName: getIngredientName(ingredientCatalog, required.id),
+        ingredientId: required.ingrediente.id,
+        ingredientName: getIngredientName(ingredientCatalog, required.ingrediente.id),
         reason: 'missing',
         requiredQuantity: required.quantidade,
         availableQuantity: 0,
-        unit: required.unit,
+        unit: required.ingrediente.unidade,
       });
       continue;
     }
 
-    if (available.unit !== required.unit || available.quantity < required.quantidade) {
+    if (available.unit !== required.ingrediente.unidade || available.quantity < required.quantidade) {
       issues.push({
-        ingredientId: required.id,
-        ingredientName: getIngredientName(ingredientCatalog, required.id),
+        ingredientId: required.ingrediente.id,
+        ingredientName: getIngredientName(ingredientCatalog, required.ingrediente.id),
         reason: 'insufficient',
         requiredQuantity: required.quantidade,
         availableQuantity: available.quantity,
-        unit: required.unit,
+        unit: required.ingrediente.unidade,
       });
     }
   }

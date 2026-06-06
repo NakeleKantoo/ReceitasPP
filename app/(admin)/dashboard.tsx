@@ -1,35 +1,49 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { StatCard } from '@/components/StatCard';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { getDashboardStats } from '@/services/adminService';
 import { spacing } from '@/theme/spacing';
+import type { AdminDashboardStats } from '@/types/admin';
 
 export default function DashboardScreen() {
   const { colors } = useAppTheme();
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStats>> | null>(null);
+  const [stats, setStats] = useState<AdminDashboardStats | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function loadDashboard() {
-      const nextStats = await getDashboardStats();
-      setStats(nextStats);
+      try {
+        setError('');
+        const nextStats = await getDashboardStats();
+        setStats(nextStats);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : 'Nao foi possivel carregar o dashboard.');
+      }
     }
 
     void loadDashboard();
   }, []);
 
-  if (!stats) {
+  if (!stats && !error) {
     return (
-      <Screen title="Dashboard admin" subtitle="Carregando indicadores do Receitas++.">
+      <Screen title="Dashboard admin" subtitle="Carregando indicadores administrativos reais.">
         <View style={styles.loadingState}>
           <ActivityIndicator size="small" color={colors.primary} />
-          <Text style={[styles.loadingText, { color: colors.mutedText }]}>
-            Preparando o resumo administrativo.
-          </Text>
+          <Text style={[styles.loadingText, { color: colors.mutedText }]}>Buscando metricas do sistema...</Text>
         </View>
+      </Screen>
+    );
+  }
+
+  if (error) {
+    return (
+      <Screen title="Dashboard admin" subtitle="Nao foi possivel carregar os indicadores.">
+        <EmptyState title="Falha ao consultar o painel" description={error} />
       </Screen>
     );
   }
@@ -37,26 +51,31 @@ export default function DashboardScreen() {
   return (
     <Screen
       title="Dashboard admin"
-      subtitle="Visao inicial para o superadmin acompanhar usuarios, receitas e uso do sistema.">
+      subtitle="Visao global do sistema para o Superadmin acompanhar usuarios e moderacao de receitas.">
       <View style={styles.grid}>
-        <StatCard label="Usuarios" value={stats.totalUsers} />
-        <StatCard label="Receitas" value={stats.totalRecipes} accent="secondary" />
-        <StatCard label="Pendentes" value={stats.pendingRecipes} />
-        <StatCard label="Aprovadas" value={stats.approvedRecipes} accent="secondary" />
-        <StatCard label="Favoritos" value={stats.totalFavorites} />
+        <StatCard label="Usuarios" value={stats?.totalUsers ?? 0} />
+        <StatCard label="Receitas" value={stats?.totalRecipes ?? 0} accent="secondary" />
+        <StatCard label="Pendentes" value={stats?.pendingRecipes ?? 0} />
+        <StatCard label="Aprovadas" value={stats?.approvedRecipes ?? 0} accent="secondary" />
+        <StatCard label="Rejeitadas" value={stats?.rejectedRecipes ?? 0} />
       </View>
 
-      <View style={[styles.noteCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.noteTitle, { color: colors.text }]}>Painel inicial</Text>
-        <Text style={[styles.noteText, { color: colors.mutedText }]}>
-          A autenticacao local e as rotas protegidas ja estao ativas. Nesta fase o superadmin consegue
-          entrar, visualizar o catalogo geral e acompanhar os dados mockados do sistema.
-        </Text>
-      </View>
-
-      <SectionTitle title="Top categorias" subtitle="Resumo simples derivado das receitas mockadas." />
+      <SectionTitle title="Categorias com mais receitas" />
       <View style={styles.list}>
-        {stats.topCategories.map((item) => (
+        {stats?.topCategories.length ? (
+          stats.topCategories.map((item) => (
+            <Text key={item.label} style={[styles.item, { color: colors.text }]}>
+              - {item.label}: {item.value}
+            </Text>
+          ))
+        ) : (
+          <EmptyState title="Sem categorias ainda" description="Nenhuma receita foi cadastrada no sistema." />
+        )}
+      </View>
+
+      <SectionTitle title="Distribuicao por status" />
+      <View style={styles.list}>
+        {stats?.recipesByStatus.map((item) => (
           <Text key={item.label} style={[styles.item, { color: colors.text }]}>
             - {item.label}: {item.value}
           </Text>
@@ -80,20 +99,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-  },
-  noteCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: spacing.sm,
-    padding: spacing.xl,
-  },
-  noteTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  noteText: {
-    fontSize: 14,
-    lineHeight: 21,
   },
   list: {
     gap: spacing.sm,

@@ -1,64 +1,33 @@
-import { mockIngredients } from '@/data/mockIngredients';
-import { getAllRecipes, getPendingRecipes } from '@/services/recipeService';
 import {
-  getStoredFavorites,
-  getStoredSearchLogs,
-  getStoredUsers,
-  initializeStorage,
-} from '@/services/storageService';
-
-function sortEntries(entries: Record<string, number>) {
-  return Object.entries(entries)
-    .sort((first, second) => second[1] - first[1])
-    .map(([label, value]) => ({ label, value }));
-}
+  deleteAdminRecipe,
+  fetchAdminDashboard,
+  fetchAdminRecipes,
+  fetchAdminReports,
+  fetchAdminUsers,
+  updateAdminRecipeStatus,
+} from '@/utils/endpoints';
+import type { RecipeStatus } from '@/types/recipe';
 
 export async function getAllUsers() {
-  await initializeStorage();
-  return getStoredUsers();
+  return await fetchAdminUsers();
 }
 
 export async function getDashboardStats() {
-  await initializeStorage();
-  const [users, favorites, searchLogs] = await Promise.all([
-    getStoredUsers(),
-    getStoredFavorites(),
-    getStoredSearchLogs(),
-  ]);
-  const recipes = getAllRecipes();
+  return await fetchAdminDashboard();
+}
 
-  const categoryUsage: Record<string, number> = {};
-  const usedIngredients: Record<string, number> = {};
-  const searchedIngredients: Record<string, number> = {};
+export async function getAdminReports() {
+  return await fetchAdminReports();
+}
 
-  for (const recipe of recipes) {
-    categoryUsage[recipe.refeicao] = (categoryUsage[recipe.refeicao] ?? 0) + 1;
+export async function getAllAdminRecipes(status?: RecipeStatus) {
+  return await fetchAdminRecipes(status);
+}
 
-    for (const ingredient of recipe.ingredientes) {
-      const ingredientName =
-        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.nome ??
-        ingredient.ingredientId;
-      usedIngredients[ingredientName] = (usedIngredients[ingredientName] ?? 0) + 1;
-    }
-  }
+export async function moderateRecipe(recipeId: number, status: RecipeStatus) {
+  return await updateAdminRecipeStatus(recipeId, status);
+}
 
-  for (const log of searchLogs) {
-    for (const ingredient of log.ingredients) {
-      const ingredientName =
-        mockIngredients.find((item) => item.id === ingredient.ingredientId)?.nome ??
-        ingredient.ingredientId;
-      searchedIngredients[ingredientName] = (searchedIngredients[ingredientName] ?? 0) + 1;
-    }
-  }
-
-  return {
-    totalUsers: users.length,
-    totalRecipes: recipes.length,
-    pendingRecipes: getPendingRecipes().length,
-    approvedRecipes: recipes.filter((recipe) => recipe.status === 'approved').length,
-    totalFavorites: favorites.length,
-    topCategories: sortEntries(categoryUsage).slice(0, 5),
-    topUsedIngredients: sortEntries(usedIngredients).slice(0, 5),
-    topSearchedIngredients: sortEntries(searchedIngredients).slice(0, 5),
-  };
+export async function removeRecipeAsAdmin(recipeId: number) {
+  return await deleteAdminRecipe(recipeId);
 }
