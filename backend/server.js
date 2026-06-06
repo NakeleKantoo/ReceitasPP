@@ -13,7 +13,7 @@ import { IngredienteReceita } from "./entity/IngredienteReceita.js";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "receitaspp-dev-secret";
-const PORT = 3069;
+const PORT = process.env.PORT ?? 3069;
 const HOST = "0.0.0.0";
 const app = express();
 
@@ -282,13 +282,13 @@ async function checkAuth(req, res, next) {
     const user = await usuarioRepo.findOneBy({ id: payload.id });
 
     if (!user) {
-      return res.status(401).json({ message: "Usuario da sessao nao encontrado." });
+      return res.status(401).json({ message: "Usuario da sessão nao encontrado." });
     }
 
     req.user = sanitizeUser(user);
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Sem autorizacao." });
+    return res.status(401).json({ message: "Sem autorização." });
   }
 }
 
@@ -304,14 +304,14 @@ async function checkRecipeOwnershipOrAdmin(req, res, next) {
   const recipe = await buildRecipeResponse(req.params.id);
 
   if (!recipe) {
-    return res.status(404).json({ message: "Receita nao encontrada." });
+    return res.status(404).json({ message: "Receita não encontrada." });
   }
 
   const isAdmin = req.user?.account_type === "superadmin";
   const isOwner = recipe.autor?.id === req.user?.id;
 
   if (!isAdmin && !isOwner) {
-    return res.status(403).json({ message: "Voce nao pode alterar essa receita." });
+    return res.status(403).json({ message: "Voce não pode alterar essa receita." });
   }
 
   req.recipe = recipe;
@@ -442,11 +442,11 @@ app.get("/receitas/:id", checkAuth, async (req, res) => {
   const recipe = await buildRecipeResponse(req.params.id);
 
   if (!recipe) {
-    return res.status(404).json({ message: "Receita nao encontrada." });
+    return res.status(404).json({ message: "Receita não encontrada." });
   }
 
   if (!canUserAccessRecipe(req.user, recipe)) {
-    return res.status(403).json({ message: "Voce nao tem acesso a esta receita." });
+    return res.status(403).json({ message: "Voce não tem acesso a esta receita." });
   }
 
   return res.status(200).json(recipe);
@@ -643,12 +643,14 @@ app.get("/admin/reports", checkAuth, checkAdmin, async (_req, res) => {
 AppDataSource.initialize()
   .then(async () => {
     await seedDatabase();
-    app.listen(PORT, HOST, () => {
+    app.listen(PORT, HOST, (err) => {
       console.log(`Receitas++ backend executando em http://${HOST}:${PORT}/`);
       console.log(`Teste local: http://127.0.0.1:${PORT}/health`);
       console.log(`Android Emulator: http://10.0.2.2:${PORT}/health`);
+      console.log(err);
     });
-  })
-  .catch((error) => {
+})
+.catch((error) => {
     console.error("Falha ao iniciar o backend:", error);
-  });
+});
+
