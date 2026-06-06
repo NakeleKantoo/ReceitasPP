@@ -15,25 +15,27 @@ export const Usuario = new EntitySchema({
     },
     username: {
       type: "text",
-      unique: false,
     },
     password: {
       type: "text",
-      select: false
+      select: false,
     },
     account_type: {
-      type: 'text'
+      type: "text",
+      default: "normal",
     },
-    created_at: {
-      type: "date",
+    createdAt: {
+      name: "created_at",
+      type: "datetime",
+      createDate: true,
     },
   },
   relations: {
     favoritos: {
-      type: 'many-to-many',
-      target: 'Receita',
-      inverseSide: 'usuarios',
+      type: "many-to-many",
+      target: "Receita",
+      inverseSide: "usuarios",
       joinTable: true,
-    }
-  }
+    },
+  },
 });
