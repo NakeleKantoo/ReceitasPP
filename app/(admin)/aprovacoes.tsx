@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
@@ -16,7 +17,7 @@ export default function AprovacoesScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadPendingRecipes = async () => {
+  const loadPendingRecipes = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
@@ -26,11 +27,13 @@ export default function AprovacoesScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    void loadPendingRecipes();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadPendingRecipes();
+    }, [loadPendingRecipes])
+  );
 
   const handleModeration = async (recipeId: number, nextStatus: 'approved' | 'rejected') => {
     try {

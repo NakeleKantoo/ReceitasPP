@@ -57,6 +57,47 @@ function sortEntries(entries) {
     .map(([label, value]) => ({ label, value }));
 }
 
+async function buildAdminAnalytics() {
+  const [totalUsers, recipes] = await Promise.all([
+    usuarioRepo.count(),
+    receitaRepo.find({
+      relations: {
+        autor: true,
+      },
+    }),
+  ]);
+
+  const categories = {};
+  const authors = {};
+  const statuses = {
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  };
+
+  for (const recipe of recipes) {
+    categories[recipe.refeicao] = (categories[recipe.refeicao] ?? 0) + 1;
+
+    if (recipe.status in statuses) {
+      statuses[recipe.status] += 1;
+    }
+
+    const authorLabel = recipe.autor?.username ?? "Sem autor";
+    authors[authorLabel] = (authors[authorLabel] ?? 0) + 1;
+  }
+
+  return {
+    totalUsers,
+    totalRecipes: recipes.length,
+    pendingRecipes: statuses.pending,
+    approvedRecipes: statuses.approved,
+    rejectedRecipes: statuses.rejected,
+    topCategories: sortEntries(categories),
+    authorSummary: sortEntries(authors),
+    statusSummary: sortEntries(statuses),
+  };
+}
+
 async function buildRecipeResponse(recipeId) {
   return await receitaRepo.findOne({
     where: { id: Number(recipeId) },
@@ -542,61 +583,26 @@ app.delete("/admin/recipes/:id", checkAuth, checkAdmin, async (req, res) => {
 });
 
 app.get("/admin/dashboard", checkAuth, checkAdmin, async (_req, res) => {
-  const [totalUsers, totalRecipes, pendingRecipes, approvedRecipes, rejectedRecipes, recipes] =
-    await Promise.all([
-      usuarioRepo.count(),
-      receitaRepo.count(),
-      receitaRepo.countBy({ status: "pending" }),
-      receitaRepo.countBy({ status: "approved" }),
-      receitaRepo.countBy({ status: "rejected" }),
-      receitaRepo.find({ relations: { autor: true } }),
-    ]);
-
-  const categories = {};
-  const statuses = {
-    pending: pendingRecipes,
-    approved: approvedRecipes,
-    rejected: rejectedRecipes,
-  };
-
-  for (const recipe of recipes) {
-    categories[recipe.refeicao] = (categories[recipe.refeicao] ?? 0) + 1;
-  }
+  const analytics = await buildAdminAnalytics();
 
   return res.status(200).json({
-    totalUsers,
-    totalRecipes,
-    pendingRecipes,
-    approvedRecipes,
-    rejectedRecipes,
-    topCategories: sortEntries(categories).slice(0, 5),
-    recipesByStatus: sortEntries(statuses),
+    totalUsers: analytics.totalUsers,
+    totalRecipes: analytics.totalRecipes,
+    pendingRecipes: analytics.pendingRecipes,
+    approvedRecipes: analytics.approvedRecipes,
+    rejectedRecipes: analytics.rejectedRecipes,
+    topCategories: analytics.topCategories.slice(0, 5),
+    recipesByStatus: analytics.statusSummary,
   });
 });
 
 app.get("/admin/reports", checkAuth, checkAdmin, async (_req, res) => {
-  const recipes = await receitaRepo.find({
-    relations: {
-      autor: true,
-    },
-  });
-
-  const categories = {};
-  const authors = {};
-  const statuses = {};
-
-  for (const recipe of recipes) {
-    categories[recipe.refeicao] = (categories[recipe.refeicao] ?? 0) + 1;
-    statuses[recipe.status] = (statuses[recipe.status] ?? 0) + 1;
-
-    const authorLabel = recipe.autor?.username ?? "Sem autor";
-    authors[authorLabel] = (authors[authorLabel] ?? 0) + 1;
-  }
+  const analytics = await buildAdminAnalytics();
 
   return res.status(200).json({
-    categories: sortEntries(categories),
-    authors: sortEntries(authors),
-    statuses: sortEntries(statuses),
+    categories: analytics.topCategories,
+    authors: analytics.authorSummary,
+    statuses: analytics.statusSummary,
   });
 });
 
