@@ -42,7 +42,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       isLoading,
       toggleFavorite: async (recipeId) => {
         if (!user) {
-          throw new Error('Faca login para favoritar receitas.');
+          throw new Error('Faça login para favoritar receitas.');
         }
 
         const result = await favoriteService.toggleFavorite(user.id, recipeId);

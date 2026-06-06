@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
@@ -8,13 +9,16 @@ import { IngredientQuantityInput } from '@/components/IngredientQuantityInput';
 import { Input } from '@/components/Input';
 import { Screen } from '@/components/Screen';
 import { SectionTitle } from '@/components/SectionTitle';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useRecipes } from '@/hooks/useRecipes';
 import { spacing } from '@/theme/spacing';
 import type { NewRecipeInput } from '@/types/recipe';
+import { recipeCategoryOptions } from '@/utils/formatters';
 import { validatePositiveNumber, validateRecipeInput } from '@/utils/validators';
 
 export default function NovaReceitaScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
   const { ingredientCatalog, createRecipe, isLoading } = useRecipes();
   const [nome, setNome] = useState('');
   const [refeicao, setRefeicao] = useState('');
@@ -24,6 +28,23 @@ export default function NovaReceitaScreen() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectionState, setSelectionState] = useState<Record<number, { selected: boolean; quantity: string }>>({});
+
+  const resetForm = useCallback(() => {
+    setNome('');
+    setRefeicao('');
+    setTempoPreparo('');
+    setPorcoes('');
+    setPassos('');
+    setError('');
+    setIsSubmitting(false);
+    setSelectionState({});
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      resetForm();
+    }, [resetForm])
+  );
 
   const ingredientState = useMemo(
     () =>
@@ -36,13 +57,18 @@ export default function NovaReceitaScreen() {
   );
 
   const handleToggle = (ingredientId: number) => {
-    setSelectionState((currentState) => ({
-      ...currentState,
-      [ingredientId]: {
-        selected: !currentState[ingredientId]?.selected,
-        quantity: currentState[ingredientId]?.quantity ?? '',
-      },
-    }));
+    setSelectionState((currentState) => {
+      const currentIngredient = currentState[ingredientId];
+      const nextSelected = !currentIngredient?.selected;
+
+      return {
+        ...currentState,
+        [ingredientId]: {
+          selected: nextSelected,
+          quantity: nextSelected ? currentIngredient?.quantity ?? '' : '',
+        },
+      };
+    });
   };
 
   const handleQuantityChange = (ingredientId: number, quantity: string) => {
@@ -80,7 +106,7 @@ export default function NovaReceitaScreen() {
     }
 
     if (selectedIngredients.some((ingredient) => !validatePositiveNumber(ingredient.quantidade))) {
-      setError('Informe quantidades validas para todos os ingredientes selecionados.');
+      setError('Informe quantidades válidas para todos os ingredientes selecionados.');
       return;
     }
 
@@ -89,7 +115,7 @@ export default function NovaReceitaScreen() {
       setError('');
       await createRecipe({
         nome: recipeInput.nome.trim(),
-        refeicao: recipeInput.refeicao.trim(),
+        refeicao: recipeInput.refeicao,
         tempoPreparo: recipeInput.tempoPreparo,
         porcoes: recipeInput.porcoes,
         passos: recipeInput.passos.trim(),
@@ -101,11 +127,12 @@ export default function NovaReceitaScreen() {
 
       Alert.alert(
         'Receita enviada',
-        'Sua receita foi cadastrada com status pendente e ja esta disponivel para moderacao do Superadmin.'
+        'Sua receita foi cadastrada com status pendente e já está disponível para moderação do Superadmin.'
       );
+      resetForm();
       router.replace('/(user)/minhas-receitas');
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Nao foi possivel enviar a receita.');
+      setError(submitError instanceof Error ? submitError.message : 'Não foi possível enviar a receita.');
     } finally {
       setIsSubmitting(false);
     }
@@ -113,10 +140,10 @@ export default function NovaReceitaScreen() {
 
   if (isLoading && ingredientCatalog.length === 0) {
     return (
-      <Screen title="Nova receita" subtitle="Carregando ingredientes disponiveis para o formulario.">
+      <Screen title="Nova receita" subtitle="Carregando os ingredientes disponíveis para o formulário." showBackButton>
         <EmptyState
-          title="Preparando formulario"
-          description="Aguarde enquanto os ingredientes cadastrados sao carregados."
+          title="Preparando formulário"
+          description="Aguarde enquanto os ingredientes cadastrados são carregados."
         />
       </Screen>
     );
@@ -124,10 +151,10 @@ export default function NovaReceitaScreen() {
 
   if (!isLoading && ingredientCatalog.length === 0) {
     return (
-      <Screen title="Nova receita" subtitle="Nao foi possivel montar o formulario completo agora.">
+      <Screen title="Nova receita" subtitle="Não foi possível montar o formulário completo agora." showBackButton>
         <EmptyState
-          title="Ingredientes indisponiveis"
-          description="Os ingredientes nao foram carregados. Volte mais tarde ou refaça o login para tentar novamente."
+          title="Ingredientes indisponíveis"
+          description="Os ingredientes não foram carregados. Volte mais tarde ou refaça o login para tentar novamente."
         />
       </Screen>
     );
@@ -136,15 +163,36 @@ export default function NovaReceitaScreen() {
   return (
     <Screen
       title="Nova receita"
-      subtitle="Cadastre uma nova receita com ingredientes, quantidades e modo de preparo. O envio vai para moderacao.">
+      subtitle="Cadastre uma nova receita com ingredientes, quantidades e modo de preparo. O envio vai para moderação."
+      showBackButton>
       <View style={styles.form}>
         <Input label="Nome da receita" value={nome} onChangeText={setNome} placeholder="Ex.: Lasanha de frango" />
-        <Input
-          label="Categoria / refeicao"
-          value={refeicao}
-          onChangeText={setRefeicao}
-          placeholder="Ex.: Almoco, Lanche, Sobremesa"
-        />
+
+        <View style={styles.categoryBlock}>
+          <Text style={[styles.categoryLabel, { color: colors.text }]}>Categoria da receita</Text>
+          <View style={styles.categoryChips}>
+            {recipeCategoryOptions.map((option) => (
+              <Pressable
+                key={option.value}
+                onPress={() => setRefeicao(option.value)}
+                style={[
+                  styles.categoryChip,
+                  {
+                    backgroundColor: refeicao === option.value ? colors.primary : colors.surface,
+                    borderColor: refeicao === option.value ? colors.primary : colors.border,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.categoryChipText,
+                    { color: refeicao === option.value ? '#fff' : colors.text },
+                  ]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
 
         <View style={styles.row}>
           <View style={styles.rowItem}>
@@ -153,12 +201,12 @@ export default function NovaReceitaScreen() {
               value={tempoPreparo}
               onChangeText={setTempoPreparo}
               keyboardType="numeric"
-              placeholder="Minutos"
+              placeholder="Em minutos"
             />
           </View>
           <View style={styles.rowItem}>
             <Input
-              label="Porcoes"
+              label="Porções"
               value={porcoes}
               onChangeText={setPorcoes}
               keyboardType="numeric"
@@ -171,7 +219,7 @@ export default function NovaReceitaScreen() {
           label="Modo de preparo"
           value={passos}
           onChangeText={setPassos}
-          placeholder={'Uma etapa por linha.\nEx.: Refogue os ingredientes.\nAdicione agua.\nCozinhe por 20 minutos.'}
+          placeholder={'Uma etapa por linha.\nEx.: Refogue os ingredientes.\nAdicione água.\nCozinhe por 20 minutos.'}
           multiline
         />
 
@@ -196,7 +244,7 @@ export default function NovaReceitaScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Button title="Enviar receita para moderacao" onPress={() => void handleSubmit()} loading={isSubmitting} />
+        <Button title="Enviar receita para moderação" onPress={() => void handleSubmit()} loading={isSubmitting} />
         <Button title="Voltar para minhas receitas" onPress={() => router.push('/(user)/minhas-receitas')} variant="ghost" />
       </View>
     </Screen>
@@ -206,6 +254,28 @@ export default function NovaReceitaScreen() {
 const styles = StyleSheet.create({
   form: {
     gap: spacing.lg,
+  },
+  categoryBlock: {
+    gap: spacing.sm,
+  },
+  categoryLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  categoryChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  categoryChip: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   row: {
     flexDirection: 'row',

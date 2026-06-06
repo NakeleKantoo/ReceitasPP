@@ -37,7 +37,7 @@ export default function UserLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Inicio',
+          title: 'Início',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />

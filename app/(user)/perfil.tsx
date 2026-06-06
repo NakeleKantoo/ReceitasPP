@@ -19,16 +19,18 @@ export default function PerfilScreen() {
   };
 
   return (
-    <Screen title="Perfil" subtitle="Informacoes basicas da conta atual e saida segura da sessao local.">
+    <Screen title="Perfil" subtitle="Informações básicas da conta atual e saída segura da sessão local.">
       <View style={[styles.profileCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.name, { color: colors.text }]}>{user?.username}</Text>
         <Text style={[styles.info, { color: colors.mutedText }]}>{user?.email}</Text>
         <Text style={[styles.info, { color: colors.mutedText }]}>
           Conta criada em {user ? formatDate(user.createdAt) : '--'}
         </Text>
-        <Text style={[styles.info, { color: colors.mutedText }]}>Perfil: {user?.account_type === 'superadmin' ? 'Superadmin' : 'Usuario comum'}</Text>
+        <Text style={[styles.info, { color: colors.mutedText }]}>
+          Perfil: {user?.account_type === 'superadmin' ? 'Superadmin' : 'Usuário comum'}
+        </Text>
       </View>
-      <Button title="Logout" onPress={() => void handleLogout()} variant="danger" />
+      <Button title="Sair da conta" onPress={() => void handleLogout()} variant="danger" />
     </Screen>
   );
 }

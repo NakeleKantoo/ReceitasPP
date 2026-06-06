@@ -38,10 +38,12 @@ export default function LoginScreen() {
   return (
     <Screen
       title="Entrar"
-      subtitle="Use uma conta comum para o fluxo principal do app ou uma conta superadmin para a area administrativa."
+      subtitle="Use uma conta comum para o fluxo principal do app ou uma conta Superadmin para a área administrativa."
       scroll={false}
       contentWidth="narrow"
-      headerAlign="center">
+      headerAlign="center"
+      showBackButton
+      onBackPress={() => router.replace('/')}>
       <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.helper, { color: colors.mutedText }]}>
           Informe suas credenciais para acessar suas receitas ou o painel administrativo.

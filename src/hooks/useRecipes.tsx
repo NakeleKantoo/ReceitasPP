@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import {
   filterRecipesByStatus,
@@ -44,7 +44,7 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
   const [compatibleRecipes, setCompatibleRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshRecipes = async () => {
+  const refreshRecipes = useCallback(async () => {
     if (!user) {
       setAllRecipes([]);
       setIngredientCatalog(getIngredientCatalogFallback());
@@ -65,11 +65,11 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     void refreshRecipes();
-  }, [user?.id]);
+  }, [refreshRecipes]);
 
   const approvedRecipes = useMemo(() => filterRecipesByStatus(allRecipes, 'approved'), [allRecipes]);
   const pendingRecipes = useMemo(() => filterRecipesByStatus(allRecipes, 'pending'), [allRecipes]);
@@ -124,6 +124,7 @@ export function RecipesProvider({ children }: { children: ReactNode }) {
       latestAvailableIngredients,
       compatibleRecipes,
       isLoading,
+      refreshRecipes,
     ]
   );
 

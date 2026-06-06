@@ -36,7 +36,7 @@ export function validateRecipeInput(input: NewRecipeInput) {
   }
 
   if (!validatePositiveNumber(input.porcoes)) {
-    errors.push('O numero de porcoes precisa ser maior que zero.');
+    errors.push('O número de porções precisa ser maior que zero.');
   }
 
   if (input.ingredientes.length === 0) {
@@ -44,11 +44,11 @@ export function validateRecipeInput(input: NewRecipeInput) {
   }
 
   if (hasDuplicateIngredientIds(input.ingredientes)) {
-    errors.push('Nao e permitido repetir o mesmo ingrediente na receita.');
+    errors.push('Não é permitido repetir o mesmo ingrediente na receita.');
   }
 
   if (input.ingredientes.some((ingredient) => !validatePositiveNumber(ingredient.quantidade))) {
-    errors.push('Todas as quantidades de ingredientes precisam ser maiores que zero.');
+    errors.push('Todas as quantidades dos ingredientes precisam ser maiores que zero.');
   }
 
   if (normalizePreparationMode(input.passos).length === 0) {
