@@ -53,6 +53,11 @@ export default function HomeScreen() {
           description={`${myRecipesCount} receita(s) vinculada(s) ao seu usuario.`}
           onPress={() => router.push('/(user)/minhas-receitas')}
         />
+        <QuickAction
+          title="Nova receita"
+          description="Envie uma receita propria para moderacao do Superadmin."
+          onPress={() => router.push('/(user)/nova-receita')}
+        />
       </View>
 
       <SectionTitle title="Receitas novas" />

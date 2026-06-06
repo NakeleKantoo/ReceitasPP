@@ -1,7 +1,7 @@
 import { getStoredSession, saveStoredSession, saveStoredUser } from '@/services/storageService';
 import type { AdminDashboardStats, AdminReports } from '@/types/admin';
 import type { Ingredient } from '@/types/ingredient';
-import type { Recipe, RecipeStatus } from '@/types/recipe';
+import type { CreateRecipePayload, Recipe, RecipeStatus } from '@/types/recipe';
 import type { User } from '@/types/user';
 import { RECEITAS_API } from '@/utils/api';
 
@@ -98,6 +98,13 @@ export async function loginOnline(email: string, password: string) {
   return payload.usuario;
 }
 
+export async function fetchCurrentUser() {
+  return await requestJson<User>('auth/me', {
+    method: 'GET',
+    withAuth: true,
+  });
+}
+
 export async function fetchReceitas() {
   return await requestJson<Recipe[]>('receitas', {
     method: 'GET',
@@ -109,6 +116,14 @@ export async function fetchReceitaById(id: number | string) {
   return await requestJson<Recipe>(`receitas/${id}`, {
     method: 'GET',
     withAuth: true,
+  });
+}
+
+export async function createRecipeOnline(payload: CreateRecipePayload) {
+  return await requestJson<Recipe>('receitas', {
+    method: 'POST',
+    withAuth: true,
+    body: payload,
   });
 }
 

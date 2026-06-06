@@ -7,7 +7,7 @@ import {
   initializeStorage,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
-import { loginOnline, registerOnline } from '@/utils/endpoints';
+import { fetchCurrentUser, loginOnline, registerOnline } from '@/utils/endpoints';
 
 export async function getUser() {
   await initializeStorage();
@@ -24,7 +24,17 @@ export async function restoreSessionUser() {
     return null;
   }
 
-  return await getUser();
+  try {
+    const user = await fetchCurrentUser();
+    return user;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Falha de rede')) {
+      return await getUser();
+    }
+
+    await logout();
+    return null;
+  }
 }
 
 export async function login(email: string, password: string) {
