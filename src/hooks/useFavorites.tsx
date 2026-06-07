@@ -61,12 +61,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         if (!user) {
           throw new Error('Faça login para favoritar receitas.');
         }
-
-        const resolvedRecipeSnapshot =
-          recipeSnapshot ??
-          allRecipes.find((recipe) => recipe.id === recipeId) ??
-          favoriteRecipes.find((recipe) => recipe.id === recipeId);
-
+        
         const resolvedRecipeSnapshot =
           recipeSnapshot ??
           allRecipes.find((recipe) => recipe.id === recipeId) ??
