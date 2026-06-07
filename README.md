@@ -1,237 +1,267 @@
 # Receitas++
 
-Aplicativo mobile de receitas inteligentes desenvolvido com React Native, Expo Router e TypeScript.
+Aplicativo mobile de receitas inteligentes desenvolvido para a disciplina de Sistemas Móveis. O projeto ajuda o usuário a descobrir quais receitas realmente pode preparar com base nos ingredientes e nas quantidades disponíveis, além de incluir um fluxo administrativo para moderação de receitas enviadas por usuários comuns.
 
-## Objetivo
+## Visão geral
 
-O Receitas++ ajuda o usuario a descobrir o que ele realmente consegue cozinhar com base nos ingredientes e nas quantidades disponiveis naquele momento. A proposta foi pensada para um projeto academico de Sistemas Moveis, com foco em utilidade pratica no celular e evolucao gradual da arquitetura.
+O projeto é dividido em duas partes:
 
-## Escopo implementado nesta etapa
+- `frontend mobile` em React Native com Expo Router
+- `backend API` em Node.js, Express, TypeORM e SQLite
 
-- FASE 1: limpeza do template Expo e base arquitetural
-- FASE 2: modelagem principal com TypeScript
-- FASE 3: dados mockados para demonstracao
-- FASE 4: autenticacao local simulada e controle de perfil
-- FASE 5: telas reais do usuario comum
-- FASE 6: filtro inteligente por ingredientes e quantidades
+O app possui autenticação, persistência local de sessão e favoritos, catálogo de receitas, filtro por compatibilidade de ingredientes e uma área administrativa com dashboard, relatórios e fila de aprovação.
 
-## Tecnologias utilizadas
+## Principais funcionalidades
+
+### Usuário comum
+
+- login, cadastro e redefinição de senha
+- sessão persistida localmente com `AsyncStorage`
+- busca de receitas por nome
+- filtro por categoria
+- visualização de receitas aprovadas
+- tela de detalhes da receita
+- favoritos persistidos localmente por usuário
+- visualização das próprias receitas
+- cadastro de novas receitas com envio para aprovação
+- filtro inteligente por ingredientes e quantidades
+- acesso parcial offline para sessão restaurada e favoritos já salvos
+
+### Superadmin
+
+- acesso separado por perfil
+- dashboard com indicadores gerais
+- listagem de usuários
+- listagem completa de receitas
+- fila de aprovações
+- moderação de status `pending`, `approved` e `rejected`
+- relatórios por categoria, autor e status
+
+## Regra de negócio central
+
+Uma receita só aparece como compatível quando todos os ingredientes exigidos estão presentes e cada quantidade informada pelo usuário é suficiente para atender à quantidade pedida pela receita.
+
+Exemplos:
+
+- se a receita exige `200g` de arroz e o usuário informa `100g`, ela não é considerada possível
+- se a receita exige arroz e ovo, mas o usuário informa apenas arroz, ela também não aparece
+- a receita só entra no resultado quando todos os ingredientes e quantidades forem atendidos
+
+## Stack utilizada
+
+### Frontend
 
 - React Native
 - Expo
 - Expo Router
 - TypeScript
+- React Navigation
 - AsyncStorage
+- React Native Safe Area Context
+- React Native Reanimated
 
-## Funcionalidades do usuario comum
+### Backend
 
-- Login com conta mockada
-- Cadastro local de novo usuario comum
-- Sessao persistida em AsyncStorage
-- Home com atalhos rapidos
-- Busca de receitas por nome
-- Filtro de receitas por categoria
-- Visualizacao apenas de receitas aprovadas
-- Visualizacao de detalhes da receita
-- Favoritar e desfavoritar receitas
-- Visualizar favoritos
-- Visualizar receitas vinculadas ao proprio usuario
-- Informar ingredientes disponiveis e suas quantidades
-- Receber apenas receitas compativeis com a disponibilidade informada
-- Logout pelo perfil
+- Node.js
+- Express
+- TypeORM
+- SQLite com `better-sqlite3`
+- JWT
+- bcrypt
 
-## Funcionalidades do superadmin
-
-- Login com conta mockada de superadmin
-- Redirecionamento para area administrativa
-- Dashboard inicial com indicadores gerais
-- Tela de usuarios cadastrados
-- Tela com todas as receitas
-- Tela de receitas pendentes
-- Tela de relatorios iniciais com categorias e ingredientes
-
-## Regra de negocio principal
-
-Uma receita so e considerada compativel quando:
-
-- todos os ingredientes exigidos pela receita estao presentes na selecao do usuario
-- a quantidade disponivel de cada ingrediente e maior ou igual a quantidade exigida
-
-Exemplo:
-
-- se a receita pede `200g` de arroz e o usuario informa `100g`, a receita nao aparece
-- se a receita pede arroz e ovo, mas o usuario informa apenas arroz, a receita nao aparece
-- se todos os ingredientes existem e todas as quantidades sao suficientes, a receita aparece
-
-## Estrutura de pastas
+## Estrutura do projeto
 
 ```text
-app/
-  _layout.tsx
-  index.tsx
-  login.tsx
-  cadastro.tsx
-  +not-found.tsx
-  (user)/
+ReceitasPP/
+  app/
     _layout.tsx
-    home.tsx
-    buscar.tsx
-    ingredientes.tsx
-    resultados.tsx
-    favoritos.tsx
-    minhas-receitas.tsx
-    nova-receita.tsx
-    perfil.tsx
-    receita/[id].tsx
-  (admin)/
-    _layout.tsx
-    dashboard.tsx
-    usuarios.tsx
-    receitas.tsx
-    aprovacoes.tsx
-    relatorios.tsx
-
-src/
-  components/
-  data/
-  features/
-  hooks/
-  services/
-  theme/
-  types/
-  utils/
+    index.tsx
+    login.tsx
+    cadastro.tsx
+    esqueci-senha.tsx
+    +not-found.tsx
+    (user)/
+      _layout.tsx
+      home.tsx
+      buscar.tsx
+      ingredientes.tsx
+      resultados.tsx
+      favoritos.tsx
+      minhas-receitas.tsx
+      nova-receita.tsx
+      perfil.tsx
+      receita/[id].tsx
+    (admin)/
+      _layout.tsx
+      dashboard.tsx
+      usuarios.tsx
+      receitas.tsx
+      aprovacoes.tsx
+      relatorios.tsx
+  src/
+    components/
+    data/
+    features/
+    hooks/
+    services/
+    theme/
+    types/
+    utils/
+  backend/
+    entity/
+    data-source.js
+    server.js
+    package.json
 ```
 
-## Dados mockados incluidos
+## Seed inicial
 
-Usuarios:
+Ao iniciar o backend, o projeto garante uma base inicial com:
 
-- usuario comum principal
-- superadmin
-- usuario adicional
+- usuários comuns e superadmin
+- catálogo ampliado de ingredientes culinários
+- receitas aprovadas, pendentes e rejeitadas
+- novas receitas pendentes distribuídas entre usuários comuns existentes
 
-Ingredientes:
-
-- arroz
-- feijao
-- ovo
-- leite
-- farinha
-- tomate
-- queijo
-- frango
-- macarrao
-- acucar
-- sal
-- oleo
-
-Receitas:
-
-- receitas aprovadas para busca e filtro inteligente
-- receitas pendentes para o fluxo administrativo
-- receita rejeitada para compor os cenarios de moderacao
+As receitas submetidas por usuários comuns entram com status `pending` para aprovação do superadmin.
 
 ## Contas de teste
 
-Usuario comum:
+### Superadmin
 
-- E-mail: `ana@receitaspp.com`
-- Senha: `123456`
+- e-mail: `admin@receitaspp.com`
+- senha: `admin123`
 
-Superadmin:
+### Usuários comuns
 
-- E-mail: `admin@receitaspp.com`
-- Senha: `admin123`
+- `ana@receitaspp.com` / `123456`
+- `bruna@receitaspp.com` / `123456`
+- `pedro@unileste.com` / `123456`
 
-## Como instalar
+## Pré-requisitos
+
+- Node.js 18+ ou superior
+- npm
+- Expo Go ou emulador Android/iOS
+
+## Como executar
+
+### 1. Instalar dependências do app mobile
 
 ```bash
 npm install
 ```
 
-## Como executar
+### 2. Instalar dependências do backend
+
+```bash
+cd backend
+npm install
+```
+
+### 3. Iniciar o backend
+
+Ainda dentro da pasta `backend`:
+
+```bash
+node server.js
+```
+
+O backend sobe por padrão em:
+
+```text
+http://127.0.0.1:3069
+```
+
+### 4. Iniciar o app Expo
+
+Em outro terminal, na raiz do projeto:
 
 ```bash
 npm start
+```
+
+Comandos úteis:
+
+```bash
 npm run android
 npm run ios
 npm run web
 ```
 
-## Como validar o fluxo atual
+## Configuração da API
 
-1. Abra o app e entre com a conta comum `ana@receitaspp.com / 123456`.
-2. Na home, use `Buscar receitas` para filtrar por nome ou categoria.
-3. Abra `Informar ingredientes`, selecione ingredientes, informe as quantidades e toque em `Encontrar receitas possiveis`.
-4. Confira a tela de resultados e abra o detalhe de uma receita compativel.
-5. Acesse `Perfil` e use `Sair` para testar o logout.
-6. Entre com a conta `admin@receitaspp.com / admin123` para validar o redirecionamento ao dashboard admin.
-
-## Verificacao de tipos
+O app tenta descobrir automaticamente a URL do backend durante o desenvolvimento com base no ambiente do Expo. Se necessário, você também pode definir manualmente:
 
 ```bash
-npx tsc --noEmit
+EXPO_PUBLIC_API_URL=http://SEU_IP:3069
+```
+
+Isso é útil quando o app estiver rodando em dispositivo físico e o backend em outra máquina da mesma rede.
+
+## Fluxo sugerido para validação
+
+1. Inicie o backend.
+2. Inicie o app com Expo.
+3. Faça login com um usuário comum.
+4. Busque receitas por nome ou categoria.
+5. Abra a tela de ingredientes, informe quantidades e valide o filtro inteligente.
+6. Favorite receitas e confira a persistência local.
+7. Cadastre uma nova receita e verifique que ela entra como `pending`.
+8. Faça login como superadmin.
+9. Abra a tela de aprovações e valide a moderação da receita enviada.
+
+## Recursos nativos utilizados
+
+O projeto não utiliza câmera, GPS nem notificações push. Os recursos nativos mais relevantes são:
+
+- `AsyncStorage` para sessão, usuário salvo, favoritos e persistência local de apoio
+- `SafeAreaProvider`, `SafeAreaView` e `useSafeAreaInsets` para adaptação da interface ao dispositivo
+- `StatusBar` para integração visual com o sistema
+- `useColorScheme` para seguir tema claro/escuro do aparelho
+- `Platform` e `expo-constants` para ajustar a URL da API conforme o ambiente
+
+O suporte offline é parcial: o app consegue restaurar sessão salva em falhas de rede e reabrir favoritos previamente armazenados, mas não oferece acesso offline completo ao catálogo nem ao painel administrativo.
+
+## Endpoints principais da API
+
+- `POST /login`
+- `POST /register`
+- `POST /auth/reset-password`
+- `GET /auth/me`
+- `GET /receitas`
+- `GET /receitas/:id`
+- `POST /receitas`
+- `PUT /receitas/:id`
+- `PUT /receitas/:id/ingredientes`
+- `GET /ingredientes`
+- `GET /admin/users`
+- `GET /admin/recipes`
+- `PATCH /admin/recipes/:id/status`
+- `GET /admin/dashboard`
+- `GET /admin/reports`
+
+## Verificação de tipos
+
+Na raiz do projeto:
+
+```bash
+npm run typecheck
 ```
 
 ## Status do projeto
 
-O projeto ja deixou de ser um template Expo e passou a ter fluxo funcional minimo para demonstracao academica. Ainda faltam fases futuras, como cadastro completo de receitas pelo usuario, aprovacao com acoes administrativas completas e maior profundidade em relatorios.
+O projeto já possui fluxo funcional de ponta a ponta com frontend mobile e backend real, incluindo autenticação, cadastro de receitas, persistência local, filtro inteligente e moderação administrativa. Ainda assim, ele continua sendo um projeto acadêmico em evolução, com espaço para melhorias como testes automatizados, refinamento de UX, upload de imagens e endurecimento de segurança para produção.
 
-## Relatorio do que foi implementado ate agora
+## Possíveis evoluções
 
-Nesta etapa, o projeto Receitas++ saiu de uma base generica do Expo Router e passou a ter um fluxo funcional minimo alinhado ao objetivo do trabalho. A arquitetura foi reorganizada em `app/` e `src/`, com separacao entre componentes, hooks, services, tipos, mocks, tema e utilitarios.
+- testes automatizados no frontend e backend
+- paginação e filtros mais avançados no painel admin
+- upload de imagem para receitas
+- melhorias no modo offline
+- edição mais completa de receitas
+- métricas e relatórios mais detalhados
 
-No fluxo publico e autenticado, foram implementadas:
+## Autor
 
-- tela inicial real do app
-- tela de login funcional
-- tela de cadastro funcional para usuario comum
-- persistencia local de sessao com AsyncStorage
-- redirecionamento por perfil entre usuario comum e superadmin
-- protecao basica de rotas por layout
-
-No fluxo do usuario comum, foram implementadas:
-
-- home com atalhos rapidos
-- busca de receitas por nome
-- filtro por categoria
-- listagem apenas de receitas aprovadas
-- tela de detalhe da receita
-- favoritos por usuario
-- perfil com logout
-- tela de ingredientes com informacao de quantidades
-- tela de resultados baseada no filtro inteligente
-
-Na regra central do projeto, foram implementadas:
-
-- comparacao entre ingredientes exigidos e ingredientes disponiveis
-- comparacao entre quantidade exigida e quantidade disponivel
-- retorno apenas de receitas totalmente compativeis
-- mensagens vazias quando nao ha busca ou nao ha receitas possiveis
-- centralizacao da logica principal em `src/utils/recipeCompatibility.ts`
-
-No fluxo administrativo inicial, foram implementadas:
-
-- login com conta superadmin mockada
-- redirecionamento para area administrativa
-- dashboard inicial com indicadores
-- listagem de usuarios cadastrados
-- listagem geral de receitas
-- fila de receitas pendentes
-- relatorios iniciais com categorias e ingredientes
-
-## Pontos de atencao no projeto atual
-
-- A autenticacao ainda e simulada e local. Ela atende bem ao objetivo academico atual, mas nao substitui backend real, hash de senha, token ou controle de sessao de producao.
-- As receitas ainda sao baseadas em mocks estaticos. O cadastro completo de novas receitas pelo usuario e a moderacao admin com edicao, aprovacao e remocao ainda precisam ser aprofundados nas proximas fases.
-- O painel do superadmin ja existe, mas ainda esta em nivel inicial. Ele mostra dados e listas, porem ainda nao executa todas as acoes administrativas previstas no escopo final.
-- A tela `nova-receita` continua como placeholder arquitetural e ainda nao representa o fluxo final de submissao.
-- O projeto ainda nao passou por validacao completa em emulador/dispositivo para UX fina, apenas por revisao estrutural e checagem de TypeScript.
-- Existe um diretorio antigo de teste em `components/__tests__`, mas o projeto ainda nao possui uma suite de testes configurada de fato. Isso merece alinhamento futuro para evitar falsa impressao de cobertura.
-- O historico de buscas e a persistencia local ja foram preparados, mas o uso analitico desses dados ainda e simples nesta etapa.
-
-## Observacoes
-
-- A autenticacao desta etapa e local e simulada, adequada para demonstracao e testes academicos.
-- Sessao, favoritos e historico simples de buscas sao persistidos via AsyncStorage.
-- A arquitetura foi preparada para futura integracao com backend real sem concentrar regra de negocio nas telas.
+Projeto acadêmico desenvolvido para a disciplina de Sistemas Móveis.
