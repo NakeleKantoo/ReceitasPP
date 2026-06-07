@@ -54,7 +54,7 @@ function AppNavigator() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.background, padding: 16 },
+          contentStyle: { backgroundColor: colors.background },
         }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
