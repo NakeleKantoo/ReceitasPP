@@ -126,59 +126,677 @@ async function buildRecipeResponse(recipeId) {
   });
 }
 
+const allowedRecipeCategories = new Set([
+  "Cafe da manha",
+  "Almoco",
+  "Jantar",
+  "Lanche",
+  "Sobremesa",
+  "Bebida",
+]);
+
+const ingredientCatalog = [
+  { nome: "Arroz", unidade: "g" },
+  { nome: "Feijao", unidade: "g" },
+  { nome: "Ovo", unidade: "un" },
+  { nome: "Leite", unidade: "ml" },
+  { nome: "Farinha", unidade: "g" },
+  { nome: "Tomate", unidade: "g" },
+  { nome: "Queijo", unidade: "g" },
+  { nome: "Frango", unidade: "g" },
+  { nome: "Acucar", unidade: "g" },
+  { nome: "Agua", unidade: "ml" },
+  { nome: "Alface", unidade: "g" },
+  { nome: "Alho", unidade: "g" },
+  { nome: "Aveia em flocos", unidade: "g" },
+  { nome: "Azeite", unidade: "ml" },
+  { nome: "Banana", unidade: "un" },
+  { nome: "Batata", unidade: "g" },
+  { nome: "Biscoito maizena", unidade: "g" },
+  { nome: "Cafe em po", unidade: "g" },
+  { nome: "Canela em po", unidade: "g" },
+  { nome: "Carne moida", unidade: "g" },
+  { nome: "Cebola", unidade: "g" },
+  { nome: "Cenoura", unidade: "g" },
+  { nome: "Chocolate em po", unidade: "g" },
+  { nome: "Creme de leite", unidade: "ml" },
+  { nome: "Fermento em po", unidade: "g" },
+  { nome: "Goma de tapioca", unidade: "g" },
+  { nome: "Iogurte natural", unidade: "ml" },
+  { nome: "Leite condensado", unidade: "ml" },
+  { nome: "Limao", unidade: "un" },
+  { nome: "Macarrao espaguete", unidade: "g" },
+  { nome: "Macarrao parafuso", unidade: "g" },
+  { nome: "Manteiga", unidade: "g" },
+  { nome: "Milho verde", unidade: "g" },
+  { nome: "Molho de tomate", unidade: "ml" },
+  { nome: "Oleo", unidade: "ml" },
+  { nome: "Pao frances", unidade: "un" },
+  { nome: "Pepino", unidade: "g" },
+  { nome: "Pimenta calabresa", unidade: "g" },
+  { nome: "Pimenta-do-reino", unidade: "g" },
+  { nome: "Presunto", unidade: "g" },
+  { nome: "Queijo parmesao", unidade: "g" },
+  { nome: "Sal", unidade: "g" },
+  { nome: "Vinagre", unidade: "ml" },
+];
+
+const defaultUsers = [
+  {
+    username: "Super Admin",
+    email: "admin@receitaspp.com",
+    password: "admin123",
+    account_type: "superadmin",
+  },
+  {
+    username: "Ana Souza",
+    email: "ana@receitaspp.com",
+    password: "123456",
+    account_type: "normal",
+  },
+  {
+    username: "Bruna Costa",
+    email: "bruna@receitaspp.com",
+    password: "123456",
+    account_type: "normal",
+  },
+  {
+    username: "Pedro",
+    email: "pedro@unileste.com",
+    password: "123456",
+    account_type: "normal",
+  },
+];
+
+const expandedPendingRecipeBlueprints = [
+  {
+    nome: "Tapioca com queijo",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 10,
+    porcoes: 1,
+    passos: "Aqueca a frigideira.\nEspalhe a goma de tapioca.\nAdicione o queijo e dobre ate firmar.",
+    ingredientes: [
+      { nome: "Goma de tapioca", quantidade: 120 },
+      { nome: "Queijo", quantidade: 80 },
+    ],
+  },
+  {
+    nome: "Mingau de aveia",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 12,
+    porcoes: 2,
+    passos: "Misture o leite, a aveia e o acucar.\nCozinhe mexendo ate engrossar.\nFinalize com canela.",
+    ingredientes: [
+      { nome: "Leite", quantidade: 300 },
+      { nome: "Aveia em flocos", quantidade: 40 },
+      { nome: "Acucar", quantidade: 10 },
+      { nome: "Canela em po", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Ovos mexidos com tomate",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 10,
+    porcoes: 2,
+    passos: "Bata os ovos.\nRefogue o tomate na manteiga.\nJunte os ovos e mexa ate cozinhar.",
+    ingredientes: [
+      { nome: "Ovo", quantidade: 3 },
+      { nome: "Tomate", quantidade: 80 },
+      { nome: "Manteiga", quantidade: 10 },
+      { nome: "Sal", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Panqueca de banana",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 15,
+    porcoes: 2,
+    passos: "Amasse a banana.\nMisture com os ovos, a aveia e a canela.\nGrelhe pequenas porcoes dos dois lados.",
+    ingredientes: [
+      { nome: "Banana", quantidade: 2 },
+      { nome: "Ovo", quantidade: 2 },
+      { nome: "Aveia em flocos", quantidade: 40 },
+      { nome: "Canela em po", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Pao na chapa com manteiga",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 8,
+    porcoes: 2,
+    passos: "Abra os paes.\nPasse a manteiga.\nDoure na chapa ate ficar crocante.",
+    ingredientes: [
+      { nome: "Pao frances", quantidade: 2 },
+      { nome: "Manteiga", quantidade: 20 },
+    ],
+  },
+  {
+    nome: "Crepioca simples",
+    refeicao: "Cafe da manha",
+    tempoPreparo: 10,
+    porcoes: 1,
+    passos: "Misture a goma com os ovos e o sal.\nDespeje na frigideira.\nAdicione o queijo e dobre para finalizar.",
+    ingredientes: [
+      { nome: "Goma de tapioca", quantidade: 60 },
+      { nome: "Ovo", quantidade: 2 },
+      { nome: "Queijo", quantidade: 40 },
+      { nome: "Sal", quantidade: 1 },
+    ],
+  },
+  {
+    nome: "Arroz com alho e cebola",
+    refeicao: "Almoco",
+    tempoPreparo: 35,
+    porcoes: 4,
+    passos: "Refogue o alho e a cebola no oleo.\nAdicione o arroz e mexa bem.\nAcrescente a agua e cozinhe ate secar.",
+    ingredientes: [
+      { nome: "Arroz", quantidade: 240 },
+      { nome: "Alho", quantidade: 12 },
+      { nome: "Cebola", quantidade: 80 },
+      { nome: "Oleo", quantidade: 20 },
+      { nome: "Sal", quantidade: 4 },
+      { nome: "Agua", quantidade: 500 },
+    ],
+  },
+  {
+    nome: "Feijao temperado caseiro",
+    refeicao: "Almoco",
+    tempoPreparo: 50,
+    porcoes: 4,
+    passos: "Cozinhe o feijao na agua.\nRefogue alho e cebola no oleo.\nMisture ao feijao e apure com sal.",
+    ingredientes: [
+      { nome: "Feijao", quantidade: 250 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Cebola", quantidade: 80 },
+      { nome: "Oleo", quantidade: 15 },
+      { nome: "Sal", quantidade: 4 },
+      { nome: "Agua", quantidade: 700 },
+    ],
+  },
+  {
+    nome: "Frango grelhado acebolado",
+    refeicao: "Almoco",
+    tempoPreparo: 30,
+    porcoes: 4,
+    passos: "Tempere o frango com sal e pimenta.\nGrelhe no oleo.\nJunte a cebola e cozinhe ate dourar.",
+    ingredientes: [
+      { nome: "Frango", quantidade: 500 },
+      { nome: "Cebola", quantidade: 120 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Oleo", quantidade: 20 },
+      { nome: "Sal", quantidade: 5 },
+      { nome: "Pimenta-do-reino", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Macarrao parafuso ao molho de tomate",
+    refeicao: "Almoco",
+    tempoPreparo: 30,
+    porcoes: 4,
+    passos: "Cozinhe o macarrao.\nPrepare o molho com alho e molho de tomate.\nMisture tudo e finalize com queijo parmesao.",
+    ingredientes: [
+      { nome: "Macarrao parafuso", quantidade: 250 },
+      { nome: "Molho de tomate", quantidade: 300 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Oleo", quantidade: 15 },
+      { nome: "Sal", quantidade: 4 },
+      { nome: "Queijo parmesao", quantidade: 30 },
+    ],
+  },
+  {
+    nome: "Carne moida com batata e cenoura",
+    refeicao: "Almoco",
+    tempoPreparo: 35,
+    porcoes: 4,
+    passos: "Refogue alho e cebola.\nAdicione a carne moida e cozinhe.\nJunte batata e cenoura ate ficarem macias.",
+    ingredientes: [
+      { nome: "Carne moida", quantidade: 400 },
+      { nome: "Batata", quantidade: 250 },
+      { nome: "Cenoura", quantidade: 150 },
+      { nome: "Cebola", quantidade: 100 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Oleo", quantidade: 20 },
+      { nome: "Sal", quantidade: 5 },
+    ],
+  },
+  {
+    nome: "Salada completa de alface, tomate e pepino",
+    refeicao: "Almoco",
+    tempoPreparo: 15,
+    porcoes: 3,
+    passos: "Lave e corte os vegetais.\nMisture os ingredientes.\nTempere com azeite, vinagre e sal antes de servir.",
+    ingredientes: [
+      { nome: "Alface", quantidade: 150 },
+      { nome: "Tomate", quantidade: 150 },
+      { nome: "Pepino", quantidade: 120 },
+      { nome: "Cebola", quantidade: 40 },
+      { nome: "Azeite", quantidade: 20 },
+      { nome: "Vinagre", quantidade: 15 },
+      { nome: "Sal", quantidade: 3 },
+    ],
+  },
+  {
+    nome: "Sopa de legumes com frango",
+    refeicao: "Jantar",
+    tempoPreparo: 45,
+    porcoes: 4,
+    passos: "Cozinhe o frango com alho e cebola.\nAcrescente batata, cenoura e agua.\nTempere e cozinhe ate engrossar levemente.",
+    ingredientes: [
+      { nome: "Frango", quantidade: 300 },
+      { nome: "Batata", quantidade: 250 },
+      { nome: "Cenoura", quantidade: 150 },
+      { nome: "Cebola", quantidade: 80 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Agua", quantidade: 1000 },
+      { nome: "Sal", quantidade: 5 },
+    ],
+  },
+  {
+    nome: "Omelete de cebola e tomate",
+    refeicao: "Jantar",
+    tempoPreparo: 15,
+    porcoes: 2,
+    passos: "Bata os ovos.\nMisture cebola, tomate e queijo.\nCozinhe na frigideira ate firmar.",
+    ingredientes: [
+      { nome: "Ovo", quantidade: 3 },
+      { nome: "Cebola", quantidade: 60 },
+      { nome: "Tomate", quantidade: 80 },
+      { nome: "Queijo", quantidade: 50 },
+      { nome: "Sal", quantidade: 2 },
+      { nome: "Pimenta-do-reino", quantidade: 1 },
+    ],
+  },
+  {
+    nome: "Espaguete alho e oleo",
+    refeicao: "Jantar",
+    tempoPreparo: 20,
+    porcoes: 3,
+    passos: "Cozinhe o espaguete.\nDoure o alho no oleo.\nMisture com o macarrao e finalize com pimenta calabresa.",
+    ingredientes: [
+      { nome: "Macarrao espaguete", quantidade: 250 },
+      { nome: "Alho", quantidade: 15 },
+      { nome: "Oleo", quantidade: 30 },
+      { nome: "Sal", quantidade: 4 },
+      { nome: "Pimenta calabresa", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Frango ao molho de tomate",
+    refeicao: "Jantar",
+    tempoPreparo: 35,
+    porcoes: 4,
+    passos: "Sele o frango no oleo.\nRefogue alho e cebola.\nAcrescente o molho de tomate e cozinhe ate apurar.",
+    ingredientes: [
+      { nome: "Frango", quantidade: 500 },
+      { nome: "Molho de tomate", quantidade: 300 },
+      { nome: "Cebola", quantidade: 80 },
+      { nome: "Alho", quantidade: 10 },
+      { nome: "Oleo", quantidade: 20 },
+      { nome: "Sal", quantidade: 5 },
+    ],
+  },
+  {
+    nome: "Caldo de batata com cebola",
+    refeicao: "Jantar",
+    tempoPreparo: 35,
+    porcoes: 4,
+    passos: "Cozinhe a batata na agua.\nRefogue a cebola e o alho na manteiga.\nBata parte do caldo e finalize com sal.",
+    ingredientes: [
+      { nome: "Batata", quantidade: 400 },
+      { nome: "Cebola", quantidade: 100 },
+      { nome: "Alho", quantidade: 8 },
+      { nome: "Agua", quantidade: 800 },
+      { nome: "Manteiga", quantidade: 20 },
+      { nome: "Sal", quantidade: 4 },
+    ],
+  },
+  {
+    nome: "Macarrao cremoso com queijo",
+    refeicao: "Jantar",
+    tempoPreparo: 25,
+    porcoes: 3,
+    passos: "Cozinhe o macarrao.\nAqueca o leite com manteiga e alho.\nMisture o queijo e envolva o macarrao no molho.",
+    ingredientes: [
+      { nome: "Macarrao espaguete", quantidade: 220 },
+      { nome: "Leite", quantidade: 250 },
+      { nome: "Queijo", quantidade: 120 },
+      { nome: "Manteiga", quantidade: 20 },
+      { nome: "Alho", quantidade: 8 },
+      { nome: "Sal", quantidade: 3 },
+    ],
+  },
+  {
+    nome: "Sanduiche quente de presunto e queijo",
+    refeicao: "Lanche",
+    tempoPreparo: 12,
+    porcoes: 2,
+    passos: "Abra os paes.\nRecheie com presunto, queijo e tomate.\nPasse manteiga e doure na frigideira.",
+    ingredientes: [
+      { nome: "Pao frances", quantidade: 2 },
+      { nome: "Presunto", quantidade: 80 },
+      { nome: "Queijo", quantidade: 80 },
+      { nome: "Tomate", quantidade: 50 },
+      { nome: "Manteiga", quantidade: 10 },
+    ],
+  },
+  {
+    nome: "Bolo simples",
+    refeicao: "Lanche",
+    tempoPreparo: 45,
+    porcoes: 8,
+    passos: "Misture ovos, acucar, leite e manteiga.\nAdicione farinha e fermento.\nAsse ate dourar.",
+    ingredientes: [
+      { nome: "Farinha", quantidade: 220 },
+      { nome: "Leite", quantidade: 200 },
+      { nome: "Ovo", quantidade: 3 },
+      { nome: "Acucar", quantidade: 180 },
+      { nome: "Fermento em po", quantidade: 10 },
+      { nome: "Manteiga", quantidade: 40 },
+    ],
+  },
+  {
+    nome: "Bolo de chocolate simples",
+    refeicao: "Lanche",
+    tempoPreparo: 50,
+    porcoes: 8,
+    passos: "Misture os liquidos com o acucar.\nAcrescente farinha, chocolate e fermento.\nAsse ate o centro firmar.",
+    ingredientes: [
+      { nome: "Farinha", quantidade: 220 },
+      { nome: "Leite", quantidade: 220 },
+      { nome: "Ovo", quantidade: 3 },
+      { nome: "Acucar", quantidade: 180 },
+      { nome: "Chocolate em po", quantidade: 40 },
+      { nome: "Fermento em po", quantidade: 10 },
+      { nome: "Manteiga", quantidade: 40 },
+    ],
+  },
+  {
+    nome: "Pao com ovo e tomate",
+    refeicao: "Lanche",
+    tempoPreparo: 10,
+    porcoes: 2,
+    passos: "Prepare os ovos na frigideira.\nMonte os paes com tomate.\nSirva ainda quente.",
+    ingredientes: [
+      { nome: "Pao frances", quantidade: 2 },
+      { nome: "Ovo", quantidade: 2 },
+      { nome: "Tomate", quantidade: 60 },
+      { nome: "Manteiga", quantidade: 10 },
+      { nome: "Sal", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Biscoito de aveia e banana",
+    refeicao: "Lanche",
+    tempoPreparo: 25,
+    porcoes: 4,
+    passos: "Amasse as bananas.\nMisture com aveia, acucar e canela.\nModele os biscoitos e asse ate dourar.",
+    ingredientes: [
+      { nome: "Banana", quantidade: 2 },
+      { nome: "Aveia em flocos", quantidade: 120 },
+      { nome: "Acucar", quantidade: 30 },
+      { nome: "Canela em po", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Torrada de alho com queijo",
+    refeicao: "Lanche",
+    tempoPreparo: 12,
+    porcoes: 2,
+    passos: "Misture alho com manteiga.\nPasse no pao e cubra com queijo.\nLeve para dourar ate ficar crocante.",
+    ingredientes: [
+      { nome: "Pao frances", quantidade: 2 },
+      { nome: "Alho", quantidade: 5 },
+      { nome: "Queijo", quantidade: 70 },
+      { nome: "Manteiga", quantidade: 10 },
+    ],
+  },
+  {
+    nome: "Brigadeiro de panela",
+    refeicao: "Sobremesa",
+    tempoPreparo: 20,
+    porcoes: 6,
+    passos: "Leve todos os ingredientes ao fogo baixo.\nMexa sem parar ate desgrudar do fundo.\nDeixe esfriar antes de servir.",
+    ingredientes: [
+      { nome: "Leite condensado", quantidade: 395 },
+      { nome: "Chocolate em po", quantidade: 20 },
+      { nome: "Manteiga", quantidade: 15 },
+    ],
+  },
+  {
+    nome: "Mousse de limao",
+    refeicao: "Sobremesa",
+    tempoPreparo: 15,
+    porcoes: 6,
+    passos: "Bata o leite condensado com o creme de leite.\nAdicione o suco de limao.\nLeve para gelar ate firmar.",
+    ingredientes: [
+      { nome: "Leite condensado", quantidade: 395 },
+      { nome: "Creme de leite", quantidade: 200 },
+      { nome: "Limao", quantidade: 3 },
+    ],
+  },
+  {
+    nome: "Banana caramelizada com canela",
+    refeicao: "Sobremesa",
+    tempoPreparo: 15,
+    porcoes: 4,
+    passos: "Derreta o acucar ate formar caramelo.\nJunte a manteiga e as bananas.\nFinalize com canela.",
+    ingredientes: [
+      { nome: "Banana", quantidade: 4 },
+      { nome: "Acucar", quantidade: 80 },
+      { nome: "Manteiga", quantidade: 15 },
+      { nome: "Canela em po", quantidade: 3 },
+    ],
+  },
+  {
+    nome: "Pudim simples de leite condensado",
+    refeicao: "Sobremesa",
+    tempoPreparo: 70,
+    porcoes: 8,
+    passos: "Bata os ovos com o leite condensado e o leite.\nPrepare a calda com acucar.\nAsse em banho-maria ate firmar.",
+    ingredientes: [
+      { nome: "Leite condensado", quantidade: 395 },
+      { nome: "Leite", quantidade: 300 },
+      { nome: "Ovo", quantidade: 3 },
+      { nome: "Acucar", quantidade: 120 },
+    ],
+  },
+  {
+    nome: "Pave simples de chocolate",
+    refeicao: "Sobremesa",
+    tempoPreparo: 25,
+    porcoes: 8,
+    passos: "Prepare um creme com leite condensado, creme de leite, leite e chocolate.\nMonte camadas com biscoito.\nLeve para gelar.",
+    ingredientes: [
+      { nome: "Biscoito maizena", quantidade: 180 },
+      { nome: "Leite", quantidade: 300 },
+      { nome: "Leite condensado", quantidade: 395 },
+      { nome: "Creme de leite", quantidade: 200 },
+      { nome: "Chocolate em po", quantidade: 30 },
+    ],
+  },
+  {
+    nome: "Creme gelado de banana",
+    refeicao: "Sobremesa",
+    tempoPreparo: 10,
+    porcoes: 4,
+    passos: "Bata banana, leite, iogurte e acucar.\nPolvilhe canela.\nLeve para gelar antes de servir.",
+    ingredientes: [
+      { nome: "Banana", quantidade: 3 },
+      { nome: "Leite", quantidade: 250 },
+      { nome: "Iogurte natural", quantidade: 170 },
+      { nome: "Acucar", quantidade: 25 },
+      { nome: "Canela em po", quantidade: 2 },
+    ],
+  },
+  {
+    nome: "Cafe com leite",
+    refeicao: "Bebida",
+    tempoPreparo: 8,
+    porcoes: 2,
+    passos: "Prepare o cafe com agua.\nMisture com o leite aquecido.\nAdicione acucar a gosto.",
+    ingredientes: [
+      { nome: "Cafe em po", quantidade: 20 },
+      { nome: "Agua", quantidade: 200 },
+      { nome: "Leite", quantidade: 200 },
+      { nome: "Acucar", quantidade: 20 },
+    ],
+  },
+  {
+    nome: "Chocolate quente caseiro",
+    refeicao: "Bebida",
+    tempoPreparo: 10,
+    porcoes: 2,
+    passos: "Aqueca o leite.\nMisture chocolate em po e acucar.\nMexa ate ficar homogeneo.",
+    ingredientes: [
+      { nome: "Leite", quantidade: 300 },
+      { nome: "Chocolate em po", quantidade: 25 },
+      { nome: "Acucar", quantidade: 20 },
+    ],
+  },
+  {
+    nome: "Limonada caseira",
+    refeicao: "Bebida",
+    tempoPreparo: 10,
+    porcoes: 3,
+    passos: "Esprema os limoes.\nMisture com agua e acucar.\nSirva imediatamente.",
+    ingredientes: [
+      { nome: "Limao", quantidade: 3 },
+      { nome: "Agua", quantidade: 500 },
+      { nome: "Acucar", quantidade: 50 },
+    ],
+  },
+  {
+    nome: "Vitamina de banana com aveia",
+    refeicao: "Bebida",
+    tempoPreparo: 8,
+    porcoes: 2,
+    passos: "Bata banana, leite, aveia e acucar.\nSirva logo em seguida.",
+    ingredientes: [
+      { nome: "Banana", quantidade: 2 },
+      { nome: "Leite", quantidade: 300 },
+      { nome: "Aveia em flocos", quantidade: 30 },
+      { nome: "Acucar", quantidade: 15 },
+    ],
+  },
+  {
+    nome: "Cappuccino caseiro",
+    refeicao: "Bebida",
+    tempoPreparo: 10,
+    porcoes: 2,
+    passos: "Prepare o cafe.\nAqueca o leite com chocolate e acucar.\nMisture tudo e finalize com canela.",
+    ingredientes: [
+      { nome: "Cafe em po", quantidade: 20 },
+      { nome: "Leite", quantidade: 250 },
+      { nome: "Chocolate em po", quantidade: 10 },
+      { nome: "Canela em po", quantidade: 2 },
+      { nome: "Acucar", quantidade: 20 },
+    ],
+  },
+  {
+    nome: "Iogurte batido com banana",
+    refeicao: "Bebida",
+    tempoPreparo: 8,
+    porcoes: 2,
+    passos: "Bata o iogurte com banana, leite e acucar.\nSirva gelado.",
+    ingredientes: [
+      { nome: "Iogurte natural", quantidade: 250 },
+      { nome: "Banana", quantidade: 2 },
+      { nome: "Leite", quantidade: 100 },
+      { nome: "Acucar", quantidade: 10 },
+    ],
+  },
+];
+
+function normalizeSeedKey(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function buildIngredientMap(ingredients) {
+  return new Map(
+    ingredients.map((ingredient) => [normalizeSeedKey(ingredient.nome), ingredient])
+  );
+}
+
+function validateRecipeBlueprints(recipeBlueprints) {
+  const seenRecipeNames = new Set();
+
+  for (const recipe of recipeBlueprints) {
+    const recipeKey = normalizeSeedKey(recipe.nome);
+    if (seenRecipeNames.has(recipeKey)) {
+      throw new Error(`Receita duplicada no seed expandido: ${recipe.nome}`);
+    }
+    seenRecipeNames.add(recipeKey);
+
+    if (!allowedRecipeCategories.has(recipe.refeicao)) {
+      throw new Error(`Categoria invalida no seed expandido: ${recipe.refeicao}`);
+    }
+
+    const ingredientNames = recipe.ingredientes.map((ingredient) =>
+      normalizeSeedKey(ingredient.nome)
+    );
+    const uniqueIngredientNames = new Set(ingredientNames);
+
+    if (uniqueIngredientNames.size !== ingredientNames.length) {
+      throw new Error(`Ingrediente repetido dentro da receita: ${recipe.nome}`);
+    }
+  }
+}
+
 async function seedIngredients() {
-  const ingredientsCount = await ingredienteRepo.count();
-  if (ingredientsCount > 0) {
+  const existingIngredients = await ingredienteRepo.find();
+  const existingIngredientKeys = new Set(
+    existingIngredients.map((ingredient) => normalizeSeedKey(ingredient.nome))
+  );
+  const missingIngredients = ingredientCatalog.filter(
+    (ingredient) => !existingIngredientKeys.has(normalizeSeedKey(ingredient.nome))
+  );
+
+  if (missingIngredients.length === 0) {
     return;
   }
 
-  await ingredienteRepo.save([
-    { nome: "Arroz", unidade: "g" },
-    { nome: "Feijao", unidade: "g" },
-    { nome: "Ovo", unidade: "un" },
-    { nome: "Leite", unidade: "ml" },
-    { nome: "Farinha", unidade: "g" },
-    { nome: "Tomate", unidade: "g" },
-    { nome: "Queijo", unidade: "g" },
-    { nome: "Frango", unidade: "g" },
-  ]);
+  await ingredienteRepo.save(
+    missingIngredients.map((ingredient) => ingredienteRepo.create(ingredient))
+  );
 }
 
 async function seedUsers() {
-  const usersCount = await usuarioRepo.count();
-  if (usersCount > 0) {
+  const existingUsers = await usuarioRepo.find({
+    select: {
+      email: true,
+    },
+  });
+  const existingEmails = new Set(
+    existingUsers.map((user) => normalizeSeedKey(user.email))
+  );
+  const missingUsers = defaultUsers.filter(
+    (user) => !existingEmails.has(normalizeSeedKey(user.email))
+  );
+
+  if (missingUsers.length === 0) {
     return;
   }
 
-  const [adminPassword, userPassword, secondUserPassword] = await Promise.all([
-    bcrypt.hash("admin123", 10),
-    bcrypt.hash("123456", 10),
-    bcrypt.hash("123456", 10),
-  ]);
+  const usersToSave = await Promise.all(
+    missingUsers.map(async (user) =>
+      usuarioRepo.create({
+        username: user.username,
+        email: user.email,
+        password: await bcrypt.hash(user.password, 10),
+        account_type: user.account_type,
+      })
+    )
+  );
 
-  await usuarioRepo.save([
-    {
-      username: "Super Admin",
-      email: "admin@receitaspp.com",
-      password: adminPassword,
-      account_type: "superadmin",
-    },
-    {
-      username: "Ana Souza",
-      email: "ana@receitaspp.com",
-      password: userPassword,
-      account_type: "normal",
-    },
-    {
-      username: "Bruna Costa",
-      email: "bruna@receitaspp.com",
-      password: secondUserPassword,
-      account_type: "normal",
-    },
-  ]);
+  await usuarioRepo.save(usersToSave);
 }
 
-async function seedRecipes() {
+async function seedLegacyRecipesIfDatabaseIsEmpty() {
   const recipesCount = await receitaRepo.count();
   if (recipesCount > 0) {
     return;
@@ -263,10 +881,84 @@ async function seedRecipes() {
   }
 }
 
+async function seedExpandedPendingRecipes() {
+  validateRecipeBlueprints(expandedPendingRecipeBlueprints);
+
+  const [ingredients, normalUsers, existingRecipes] = await Promise.all([
+    ingredienteRepo.find(),
+    usuarioRepo.find({
+      where: { account_type: "normal" },
+      order: { id: "ASC" },
+    }),
+    receitaRepo.find({
+      select: {
+        nome: true,
+      },
+    }),
+  ]);
+
+  if (normalUsers.length === 0) {
+    throw new Error("Nenhum usuario comum disponivel para distribuir autoria no seed.");
+  }
+
+  const ingredientByName = buildIngredientMap(ingredients);
+  const existingRecipeKeys = new Set(
+    existingRecipes.map((recipe) => normalizeSeedKey(recipe.nome))
+  );
+
+  for (const [index, blueprint] of expandedPendingRecipeBlueprints.entries()) {
+    const recipeKey = normalizeSeedKey(blueprint.nome);
+    if (existingRecipeKeys.has(recipeKey)) {
+      continue;
+    }
+
+    const author = normalUsers[index % normalUsers.length];
+    const ingredientLinks = blueprint.ingredientes.map((item) => {
+      const ingredient = ingredientByName.get(normalizeSeedKey(item.nome));
+
+      if (!ingredient) {
+        throw new Error(
+          `Ingrediente ausente no seed antes de criar a receita ${blueprint.nome}: ${item.nome}`
+        );
+      }
+
+      return {
+        ingrediente: ingredient,
+        quantidade: item.quantidade,
+      };
+    });
+
+    const recipe = await receitaRepo.save(
+      receitaRepo.create({
+        nome: blueprint.nome,
+        passos: blueprint.passos,
+        refeicao: blueprint.refeicao,
+        tempoPreparo: blueprint.tempoPreparo,
+        porcoes: blueprint.porcoes,
+        status: "pending",
+        autor: author,
+      })
+    );
+
+    await ingredienteReceitaRepo.save(
+      ingredientLinks.map((ingredientLink) =>
+        ingredienteReceitaRepo.create({
+          receita: recipe,
+          ingrediente: ingredientLink.ingrediente,
+          quantidade: ingredientLink.quantidade,
+        })
+      )
+    );
+
+    existingRecipeKeys.add(recipeKey);
+  }
+}
+
 async function seedDatabase() {
   await seedIngredients();
   await seedUsers();
-  await seedRecipes();
+  await seedLegacyRecipesIfDatabaseIsEmpty();
+  await seedExpandedPendingRecipes();
 }
 
 async function checkAuth(req, res, next) {
