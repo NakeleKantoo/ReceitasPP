@@ -262,6 +262,10 @@ O projeto já possui fluxo funcional de ponta a ponta com frontend mobile e back
 - edição mais completa de receitas
 - métricas e relatórios mais detalhados
 
-## Autor
+## Autores
+
+- Caetano Souza Rocha Louzada
+- Carlos Eduardo Felipe Andrade
+- Leonna Tomás Viegas
 
 Projeto acadêmico desenvolvido para a disciplina de Sistemas Móveis.
