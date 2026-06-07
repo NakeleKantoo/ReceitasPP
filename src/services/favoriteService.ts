@@ -4,6 +4,16 @@ import {
   initializeStorage,
   saveStoredFavorites,
 } from '@/services/storageService';
+import type { Favorite } from '@/types/favorite';
+import type { Recipe } from '@/types/recipe';
+
+function hasSameSnapshot(currentSnapshot: Favorite['recipeSnapshot'], nextSnapshot: Recipe) {
+  if (!currentSnapshot) {
+    return false;
+  }
+
+  return JSON.stringify(currentSnapshot) === JSON.stringify(nextSnapshot);
+}
 
 export async function getUserFavorites(userId: number) {
   await initializeStorage();
@@ -11,7 +21,37 @@ export async function getUserFavorites(userId: number) {
   return favorites.filter((favorite) => favorite.userId === userId);
 }
 
-export async function toggleFavorite(userId: number, recipeId: number) {
+export async function syncFavoriteSnapshots(userId: number, recipes: Recipe[]) {
+  await initializeStorage();
+  const favorites = await getStoredFavorites();
+  const recipesById = new Map(recipes.map((recipe) => [recipe.id, recipe]));
+  let hasChanges = false;
+
+  const nextFavorites = favorites.map((favorite) => {
+    if (favorite.userId !== userId) {
+      return favorite;
+    }
+
+    const recipe = recipesById.get(favorite.recipeId);
+    if (!recipe || hasSameSnapshot(favorite.recipeSnapshot, recipe)) {
+      return favorite;
+    }
+
+    hasChanges = true;
+    return {
+      ...favorite,
+      recipeSnapshot: recipe,
+    };
+  });
+
+  if (hasChanges) {
+    await saveStoredFavorites(nextFavorites);
+  }
+
+  return nextFavorites.filter((favorite) => favorite.userId === userId);
+}
+
+export async function toggleFavorite(userId: number, recipeId: number, recipeSnapshot?: Recipe | null) {
   await initializeStorage();
   const favorites = await getStoredFavorites();
   const existingFavorite = favorites.find(
@@ -34,6 +74,7 @@ export async function toggleFavorite(userId: number, recipeId: number) {
       userId,
       recipeId,
       createdAt: new Date().toISOString(),
+      recipeSnapshot: recipeSnapshot ?? undefined,
     },
   ];
 

@@ -1,3 +1,4 @@
+import type { Recipe } from '@/types/recipe';
 import type { AvailableIngredient } from '@/types/ingredient';
 
 export interface Favorite {
@@ -5,6 +6,7 @@ export interface Favorite {
   userId: number;
   recipeId: number;
   createdAt: string;
+  recipeSnapshot?: Recipe;
 }
 
 export interface SearchLog {

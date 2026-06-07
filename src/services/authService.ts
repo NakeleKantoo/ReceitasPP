@@ -5,6 +5,7 @@ import {
   getStoredSession,
   getStoredUser,
   initializeStorage,
+  saveStoredUser,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
 import { fetchCurrentUser, loginOnline, registerOnline, resetPasswordOnline } from '@/utils/endpoints';
@@ -26,6 +27,7 @@ export async function restoreSessionUser() {
 
   try {
     const user = await fetchCurrentUser();
+    await saveStoredUser(user);
     return user;
   } catch (error) {
     if (error instanceof Error && error.message.includes('Falha de rede')) {

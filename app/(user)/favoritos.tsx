@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { EmptyState } from '@/components/EmptyState';
+import { OfflineNotice } from '@/components/OfflineNotice';
 import { RecipeCard } from '@/components/RecipeCard';
 import { Screen } from '@/components/Screen';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -11,22 +12,31 @@ import { spacing } from '@/theme/spacing';
 export default function FavoritosScreen() {
   const router = useRouter();
   const { allRecipes } = useRecipes();
-  const { favoriteRecipeIds, isFavorite, removeFavorite } = useFavorites();
+  const { favoriteRecipeIds, favoriteRecipes, isFavorite, removeFavorite } = useFavorites();
 
-  const favoriteRecipes = allRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
+  const recipesFromCatalog = allRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
+  const offlineOnlyFavorites = favoriteRecipes.filter(
+    (recipe) => !recipesFromCatalog.some((catalogRecipe) => catalogRecipe.id === recipe.id)
+  );
+  const displayedFavoriteRecipes = [...recipesFromCatalog, ...offlineOnlyFavorites];
+  const isShowingOfflineFavorites = offlineOnlyFavorites.length > 0;
 
   return (
     <Screen
       title="Favoritos"
-      subtitle="Receitas marcadas por você ficam vinculadas ao usuário logado e persistidas localmente.">
+      subtitle="Receitas marcadas por voce ficam vinculadas ao usuario logado e persistidas localmente.">
+      {isShowingOfflineFavorites ? (
+        <OfflineNotice message="Sem internet. Exibindo receitas favoritadas salvas localmente." />
+      ) : null}
+
       <View style={styles.list}>
-        {favoriteRecipes.length === 0 ? (
+        {displayedFavoriteRecipes.length === 0 ? (
           <EmptyState
             title="Nenhum favorito salvo"
             description="Abra uma receita e toque na estrela para guardar as suas favoritas."
           />
         ) : (
-          favoriteRecipes.map((recipe) => (
+          displayedFavoriteRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
