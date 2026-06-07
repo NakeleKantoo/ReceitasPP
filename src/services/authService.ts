@@ -5,9 +5,10 @@ import {
   getStoredSession,
   getStoredUser,
   initializeStorage,
+  saveStoredUser,
 } from '@/services/storageService';
 import type { User } from '@/types/user';
-import { fetchCurrentUser, loginOnline, registerOnline } from '@/utils/endpoints';
+import { fetchCurrentUser, loginOnline, registerOnline, resetPasswordOnline } from '@/utils/endpoints';
 
 export async function getUser() {
   await initializeStorage();
@@ -26,6 +27,7 @@ export async function restoreSessionUser() {
 
   try {
     const user = await fetchCurrentUser();
+    await saveStoredUser(user);
     return user;
   } catch (error) {
     if (error instanceof Error && error.message.includes('Falha de rede')) {
@@ -71,6 +73,20 @@ export async function register(name: string, email: string, password: string) {
   }
 
   return res;
+}
+
+export async function resetPassword(email: string, password: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!validateEmail(normalizedEmail)) {
+    throw new Error('Informe um e-mail valido.');
+  }
+
+  if (!password.trim()) {
+    throw new Error('Informe uma nova senha.');
+  }
+
+  return await resetPasswordOnline(normalizedEmail, password);
 }
 
 export async function logout() {

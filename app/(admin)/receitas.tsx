@@ -44,10 +44,10 @@ export default function ReceitasAdminScreen() {
   const handleDelete = async (recipeId: number) => {
     try {
       await removeRecipeAsAdmin(recipeId);
-      Alert.alert('Receita removida', 'A receita foi removida pelo Superadmin.');
+      Alert.alert('Receita removida', 'Item removido com sucesso.');
       await loadRecipes(selectedFilter);
     } catch (deleteError) {
-      Alert.alert('Erro', deleteError instanceof Error ? deleteError.message : 'Nao foi possivel remover.');
+      Alert.alert('Erro', deleteError instanceof Error ? deleteError.message : 'Nao foi possivel remover a receita.');
     }
   };
 

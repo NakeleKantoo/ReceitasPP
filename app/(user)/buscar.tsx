@@ -77,7 +77,7 @@ export default function BuscarScreen() {
               recipe={recipe}
               isFavorite={isFavorite(recipe.id)}
               onToggleFavorite={() => {
-                void toggleFavorite(recipe.id);
+                void toggleFavorite(recipe.id, recipe);
               }}
               onPress={() =>
                 router.push({

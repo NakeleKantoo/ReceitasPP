@@ -1,5 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Redirect, Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useAppTheme';
@@ -8,12 +9,13 @@ function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
-  return <FontAwesome size={18} style={{ marginBottom: -2 }} {...props} />;
+  return <FontAwesome size={18} style={{ margin: 0 }} {...props} />;
 }
 
 export default function UserLayout() {
   const { user } = useAuth();
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   if (!user) {
     return <Redirect href="/login" />;
@@ -32,6 +34,25 @@ export default function UserLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+          borderTopWidth: 1,
+          borderRadius: 0,
+          height: 64 + insets.bottom,
+          margin: 0,
+          paddingBottom: Math.max(insets.bottom, 12),
+          paddingHorizontal: 0,
+          paddingTop: 10,
+        },
+        tabBarItemStyle: {
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingVertical: 0,
+        },
+        tabBarIconStyle: {
+          marginBottom: 0,
+          marginTop: 0,
+        },
+        tabBarLabelStyle: {
+          marginTop: 4,
         },
       }}>
       <Tabs.Screen

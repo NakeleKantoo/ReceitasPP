@@ -1,5 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,9 +35,19 @@ export function Screen({
 }: ScreenProps) {
   const { colors } = useAppTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const Container = scroll ? ScrollView : View;
   const isCenteredHeader = headerAlign === 'center';
-  const handleBackPress = onBackPress ?? (() => router.back());
+  const handleBackPress =
+    onBackPress ??
+    (() => {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return;
+      }
+
+      router.replace('/');
+    });
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>

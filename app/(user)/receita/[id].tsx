@@ -3,6 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
+import { OfflineNotice } from '@/components/OfflineNotice';
 import { Screen } from '@/components/Screen';
 import { SectionTitle } from '@/components/SectionTitle';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -17,9 +18,10 @@ export default function ReceitaDetalheScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useAppTheme();
   const { getRecipeById } = useRecipes();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { getFavoriteRecipe, isFavorite, toggleFavorite } = useFavorites();
 
   const [recipe, setRecipe] = useState(null as Recipe | null);
+  const [isOfflineFavorite, setIsOfflineFavorite] = useState(false);
 
   useEffect(() => {
     async function populate() {
@@ -29,13 +31,16 @@ export default function ReceitaDetalheScreen() {
 
       try {
         setRecipe(await getRecipeById(Number(id)));
+        setIsOfflineFavorite(false);
       } catch {
-        setRecipe(null);
+        const favoriteRecipe = getFavoriteRecipe(Number(id));
+        setRecipe(favoriteRecipe);
+        setIsOfflineFavorite(Boolean(favoriteRecipe));
       }
     }
 
     void populate();
-  }, [getRecipeById, id]);
+  }, [getFavoriteRecipe, getRecipeById, id]);
 
   if (!recipe) {
     return (
@@ -50,6 +55,9 @@ export default function ReceitaDetalheScreen() {
 
   return (
     <Screen title={recipe.nome} showBackButton>
+      {isOfflineFavorite ? (
+        <OfflineNotice message="Sem internet. Exibindo os detalhes salvos localmente desta receita favoritada." />
+      ) : null}
       <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.meta, { color: colors.primary }]}>{formatMealCategory(recipe.refeicao)}</Text>
         <Text style={[styles.meta, { color: colors.text }]}>{formatDuration(recipe.tempoPreparo)}</Text>
@@ -59,7 +67,7 @@ export default function ReceitaDetalheScreen() {
       <Button
         title={isFavorite(recipe.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
         onPress={() => {
-          void toggleFavorite(recipe.id);
+          void toggleFavorite(recipe.id, recipe);
         }}
         variant={isFavorite(recipe.id) ? 'ghost' : 'primary'}
       />
